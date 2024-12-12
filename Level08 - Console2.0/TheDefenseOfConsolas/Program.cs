@@ -1,0 +1,12 @@
+﻿Console.Title = "Defense of Consolas";
+Console.Write("Target Row? ");
+byte row = Convert.ToByte(Console.ReadLine());
+Console.Write("Target Column? ");
+byte column = Convert.ToByte(Console.ReadLine());
+Console.ForegroundColor = ConsoleColor.DarkRed;
+Console.WriteLine("Deploy to:");
+Console.WriteLine($"({row}, {column--})");
+Console.WriteLine($"({row--}, {column})");
+Console.WriteLine($"({row}, {column++})");
+Console.Write($"({row++}, {column})");
+Console.Beep(440, 1000);

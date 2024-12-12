@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35506.116 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Level 31 - The Fountain of Objects (full)", "Level 31 - The Fountain of Objects (full).csproj", "{2BBB4B11-0C31-496D-8CE0-E21463FE98FF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BBB4B11-0C31-496D-8CE0-E21463FE98FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BBB4B11-0C31-496D-8CE0-E21463FE98FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BBB4B11-0C31-496D-8CE0-E21463FE98FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BBB4B11-0C31-496D-8CE0-E21463FE98FF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
