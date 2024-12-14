@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Codding\\C#\\Solutions\\PART 3 - ADVANCED TOPICS\\Level34 - MethodsRevisited\\BetterRandom\\BetterRandom\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2FB3EA09-19FE-448A-B92E-379164548C7E}|BetterRandom.csproj|c:\\codding\\c#\\solutions\\part 3 - advanced topics\\level34 - methodsrevisited\\betterrandom\\betterrandom\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2FB3EA09-19FE-448A-B92E-379164548C7E}|BetterRandom.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Codding\\C#\\Solutions\\PART 3 - ADVANCED TOPICS\\Level34 - MethodsRevisited\\BetterRandom\\BetterRandom\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Codding\\C#\\Solutions\\PART 3 - ADVANCED TOPICS\\Level34 - MethodsRevisited\\BetterRandom\\BetterRandom\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-14T13:06:16.753Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
