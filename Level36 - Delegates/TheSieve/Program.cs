@@ -13,7 +13,7 @@ while (true)
 }
 bool IsEven(int number) => number % 2 == 0;
 bool IsPositive(int number) => number >= 0;
-bool MultipleOf10(int number) => number == number / 10 * 10;
+bool MultipleOf10(int number) => number == number % 10;
 public class Sieve
 {
     public Func<int, bool> operation;
