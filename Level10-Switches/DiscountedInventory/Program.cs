@@ -8,7 +8,9 @@
     "6 - Canoe\n" +
     "7 - Food Supplies\n" +
     "What number do you want to see the price of? ");
-int number = Convert.ToInt32(Console.ReadLine());
+int number = Convert.ToInt32(Console.ReadLine()); // exceptions are later in this book
+Console.Write("What's your name? ");
+string userName = Console.ReadLine();
 if (number > 0 && number <= 7)
 {
     string itemName = number switch
@@ -31,6 +33,6 @@ if (number > 0 && number <= 7)
         "Canoe" => 200,
         "Food Supplies" => 2,
     };
-    Console.WriteLine($"{itemName} cost {itemPrice} gold.");
+    Console.WriteLine($"{itemName} cost {(userName == "Alex" ? itemPrice / 2 : itemPrice)} gold.");
 }
 else Console.WriteLine("No such item.");
