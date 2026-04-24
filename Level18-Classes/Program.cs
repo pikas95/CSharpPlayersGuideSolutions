@@ -1,5 +1,5 @@
 ﻿Arrow arrow = new Arrow(GetArrowHead(), GetShaft(), GetFletching());
-Console.WriteLine($"{arrow._arrowHead} {arrow._fletching} {arrow._shaft} cm arrow cost: {arrow._cost}.");
+Console.WriteLine($"That arrow cost: {arrow._cost} gold.");
 ArrowHead GetArrowHead() 
 {
     Console.Write("Pick arrowhead 1-3 (1 - steel, 2 - wood, 3 - obsidian): ");
@@ -47,7 +47,6 @@ Fletching GetFletching()
                 3 => Fletching.GooseFeathers
             };
         }
-
         Console.WriteLine("There's no such arrowhead.");
     }
 }
