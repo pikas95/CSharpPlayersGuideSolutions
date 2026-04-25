@@ -56,7 +56,26 @@ internal class Arrow
     public ArrowHead ArrowHead { get; }
     public int Length { get; }
     public Fletching Fletching { get; }
-    public float Cost { get; }
+    public float Cost
+    {
+        get
+        {
+            float cost = ArrowHead switch
+            {
+                ArrowHead.Steel => 10,
+                ArrowHead.Wood => 3,
+                ArrowHead.Obsidian => 5
+            };
+            cost += Length * 0.05f;
+            cost +=  Fletching switch
+            {
+                Fletching.Plastic => 10,
+                Fletching.TurkeyFeathers => 5,
+                Fletching.GooseFeathers => 3
+            };
+            return cost;
+        }
+    }
 
     public Arrow() : this(ArrowHead.Wood, 60, Fletching.GooseFeathers) // cheapest, if not picked by player
     { }
@@ -66,19 +85,6 @@ internal class Arrow
         ArrowHead = arrowHead;
         Length = length;
         Fletching = fletching;
-        Cost = ArrowHead switch
-        {
-            ArrowHead.Steel => 10,
-            ArrowHead.Wood => 3,
-            ArrowHead.Obsidian => 5
-        } 
-        + Length * 0.05f
-        + Fletching switch
-        {
-            Fletching.Plastic => 10,
-            Fletching.TurkeyFeathers => 5,
-            Fletching.GooseFeathers => 3
-        };
     }
 }
 
