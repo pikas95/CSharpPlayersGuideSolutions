@@ -1,0 +1,63 @@
+🗡️ Project 1 — The Coin Ledger of Thornwall
+Covers: all numeric types, decimal precision, enums, classes, information hiding, properties with validation, tuples, methods, loops, switch expressions
+Narrative: The merchant guild of Thornwall has tasked you with building a ledger system to track their finances. Money must be precise. Categories must be enforced. The guild master needs summary reports on demand.
+
+OBJECTIVES
+Objective 1 — The Transaction
+Create a Transaction class. It must store:
+
+A decimal amount (not double — you will see why in Objective 6)
+A string description
+A TransactionType enum with values Income, Expense, and Transfer
+
+All fields must be private. Expose them through public read-only properties (get-only, set in constructor only). The constructor must reject a zero or negative amount by printing an error and refusing to create the entry (set amount to 0 and skip adding it in the Ledger). Think carefully: should TransactionType be a private field with a public property, or an auto-property?
+
+
+
+Objective 2 — The Ledger
+Create a Ledger class. It must hold an array of up to 100 Transaction objects and track how many have been added. Provide:
+
+void Add(Transaction t) — adds a transaction if it is valid (amount > 0) and space remains
+void PrintAll() — prints every transaction, formatted as: [Income] Sold wool: +50.25 gp
+Use a switch expression inside PrintAll to decide the prefix symbol: + for Income, - for Expense, ~ for Transfer
+
+
+
+
+Objective 3 — The Summary Report
+Write a method (decimal income, decimal expenses, decimal balance) GetSummary() that returns a tuple. In your main program, deconstruct the tuple and print a formatted report. Bonus: write a second overload (decimal income, decimal expenses, decimal balance) GetSummary(TransactionType filter) that only totals transactions of a specific type.
+
+
+
+Objective 4 — The Largest Deal
+Write a method Transaction? GetLargest() that returns the transaction with the highest amount, or null if the ledger is empty. (You can use a simple if (result == null) check for now — null handling is covered in Level 22, but this gives you a preview.)
+
+
+
+Objective 5 — The Ledger Menu
+Build a while-loop-based console menu:
+[1] Add Transaction   [2] View All   [3] Summary   [4] Biggest Deal   [5] Quit
+Parse user input with int.TryParse (or Convert.ToInt32 wrapped in a try). Use a switch expression or statement to dispatch the choice.
+
+
+
+🔴 Edge Case — Objective 6: The Precision Trap
+Add a hidden test mode. When the user types debug, run this code:
+csharpdouble dA = 0.1 + 0.2;
+decimal mA = 0.1m + 0.2m;
+Console.WriteLine(dA);   // What do you see?
+Console.WriteLine(mA);   // What do you see?
+Console.WriteLine(dA == 0.3);   // true or false?
+Console.WriteLine(mA == 0.3m);  // true or false?
+You must understand why decimal is the correct choice for currency before completing this project. Write a comment in your code explaining the difference between float/double (binary floating-point, fast, imprecise for base-10) and decimal (base-10 floating-point, slower, exact for money).
+
+
+
+🔴 Edge Case — Objective 7: The Copied Ledger
+In your main program, write this:
+csharpLedger ledgerA = new Ledger();
+ledgerA.Add(new Transaction(100m, "Wool sale", TransactionType.Income));
+Ledger ledgerB = ledgerA;   // Are these the same ledger or two ledgers?
+ledgerB.Add(new Transaction(50m, "Tax", TransactionType.Expense));
+ledgerA.PrintAll();   // Does this show 1 or 2 entries?
+Write a comment explaining what you observe and why — connecting it to Level 14's heap/reference type model. Then contrast: what would happen if Transaction were a struct instead of a class? Would the Add call change ledgerA's array?
