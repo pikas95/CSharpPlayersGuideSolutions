@@ -36,11 +36,30 @@ internal class CardGame
         }
     }
 
+    private void CreatePlayers(int cardsHandSize)
+    {
+        for (int i = 0; i < _player.Length; i++)
+        {
+            Console.Write($"Player {i + 1}, write your name: ");
+            _player[i] = new Player(Console.ReadLine(), cardsHandSize);
+        }
+    }
+
+    private void DealCards(int cardsHandSize)
+    {
+        for (int i = 0; i < cardsHandSize; i++)
+            for (int j = 0; j < _player.Length; j++)
+                _player[j].ReceiveCard(_deck.DealCard());
+    }
+
     private void PlayGame(int cardsHandSize)
     {
+        int[] pickedCardIndex = new int[_player.Length];
+        Card[] pickedCard = new Card[_player.Length];
+
         for (int round = 0; round < cardsHandSize; round++)
         {
-            int wonRoundIndex = PlayRound();
+            int wonRoundIndex = PlayRound(pickedCardIndex, pickedCard);
 
             if (wonRoundIndex != -1)
             {
@@ -61,11 +80,8 @@ internal class CardGame
         }
     }
 
-    private int PlayRound()
+    private int PlayRound(int[] pickedCardIndex, Card[] pickedCard)
     {
-        int[] pickedCardIndex = new int[_player.Length];
-        Card[] pickedCard = new Card[_player.Length];
-
         for (int i = 0; i < _player.Length; i++)
         {
             pickedCardIndex[i] = PlayerPickCard(_player[i]);
@@ -79,28 +95,12 @@ internal class CardGame
         return DetermineRoundWinner(pickedCard);
     }
 
-    private void CreatePlayers(int cardsHandSize)
-    {
-        for (int i = 0; i < _player.Length; i++)
-        {
-            Console.Write($"Player {i + 1}, write your name: ");
-            _player[i] = new Player(Console.ReadLine(), cardsHandSize);
-        }
-    }
-
-    private void DealCards( int cardsHandSize)
-    {
-        for (int i = 0; i < cardsHandSize; i++)
-            for (int j = 0; j < _player.Length; j++)
-                _player[j].ReceiveCard(_deck.DealCard());
-    }
-
     private int PlayerPickCard(Player player)
     {
-        DisplayPlayerCards(player.GetHand(), player.Holding);
+        DisplayPlayerCards(player, player.Holding);
         return AskCard(player.Holding) - 1; // returns chosen card index in _cards array
 
-        void DisplayPlayerCards(Card[] cards, int holding)
+        void DisplayPlayerCards(Player player, int holding)
         {
             Console.Clear();
             Console.WriteLine($"{player.Name}, your cards:");
@@ -109,7 +109,7 @@ internal class CardGame
             {
                 if (i % 4 == 0)
                     Console.WriteLine();
-                Console.Write($"{(i + 1), -2}: {cards[i], -20}");
+                Console.Write($"{(i + 1), -2}: {player.GetCard(i), -20}");
             }
 
             Console.WriteLine();
@@ -170,7 +170,7 @@ internal class CardGame
             Console.WriteLine("Nobody won, it's a tie!");
     }
 
-    private int DetermineGameWinner() // method to decide who won the game
+    private int DetermineGameWinner() 
     {
         int playerIndex = 0;
         bool tie = false;
@@ -234,7 +234,7 @@ internal class Player
         return playCard;
     }
 
-    public Card[] GetHand() => _hand[0..Holding];
+    public Card GetCard(int index) => _hand[index];
 
     public void WonRound() => RoundsWon++;
 
