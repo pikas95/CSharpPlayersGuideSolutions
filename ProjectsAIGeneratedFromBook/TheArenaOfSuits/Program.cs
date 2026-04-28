@@ -34,16 +34,30 @@ internal class CardGame
 
     private void CreatePlayers()
     {
-        Console.Write("How many players? ");
+        string? input = null;
+
+        while (input == null || input == "")
+        {
+            Console.Write("How many players? ");
+            input = Console.ReadLine();
+        }
+
         // I see the critical issue, it will be addressed after later chapters
-        _player = new Player[Convert.ToInt32(Console.ReadLine())];
+        _player = new Player[Convert.ToInt32(input)];
 
         int cardsHandSize = Deck.TotalCards / _player.Length;
 
         for (int i = 0; i < _player.Length; i++)
         {
-            Console.Write($"Player {i + 1}, write your name: ");
-            _player[i] = new Player(Console.ReadLine(), cardsHandSize);
+            input = null;
+
+            while (input == null || input == "")
+            {
+                Console.Write($"Player {i + 1}, write your name: ");
+                input = Console.ReadLine()!;
+            }
+
+            _player[i] = new Player(input, cardsHandSize);
         }
     }
 
@@ -119,23 +133,25 @@ internal class CardGame
 
         int AskCard(int cardsInHand)
         {
-            int input = 0;
+            int number = 0;
             Console.WriteLine();
 
-            while (input < 1 || input > cardsInHand)
+            while (number < 1 || number > cardsInHand)
             {
                 Console.Write("Pick a card from the list above: ");
-                input = Convert.ToInt32(Console.ReadLine()); // I see the critical issue, it will be addressed after later chapters
+                string input = Console.ReadLine() ?? "0"; 
+                if (input != "")
+                    number = Convert.ToInt32(input); // I see the critical issue, it will be addressed after later chapters
             }
 
             Console.Clear();
-            return input;
+            return number;
         }
     }
 
     private static void DisplayRoundCard(string playerName, string card) => Console.WriteLine($"{playerName} plays {card}");
 
-    private int DetermineRoundWinner(Card[] cards) // method to decide who won the round
+    private int DetermineRoundWinner(Card[] cards) 
     {
         int playerIndex = 0;
         bool tie = false;
@@ -195,7 +211,7 @@ internal class CardGame
     {
         Console.WriteLine();
         Console.Write("Do you want to play again (yes/no)? ");
-        string input = Console.ReadLine();
+        string input = Console.ReadLine() ?? "no";
 
         if (input != "yes")
         {
@@ -213,9 +229,9 @@ internal class Player
     public int RoundsWon { get; private set; } = 0;
     public int Holding { get; private set; } = 0;
 
-    public Player(string name, int cardsHandSize)
+    public Player(string? name, int cardsHandSize)
     {
-        Name = name != "" ? name : "Unknown";
+        Name = name != "" && name != null ? name : "Unknown";
         _hand = new Card[cardsHandSize];
     }
 
@@ -270,9 +286,7 @@ internal class Deck
         for (int i = _cards.Length - 1; i > 0; i--)
         {
             int random = new Random().Next(0, i + 1);
-            Card temp = _cards[random];
-            _cards[random] = _cards[i];
-            _cards[i] = temp;
+            (_cards[i], _cards[random]) = (_cards[random], _cards[i]);
         }
     }
 

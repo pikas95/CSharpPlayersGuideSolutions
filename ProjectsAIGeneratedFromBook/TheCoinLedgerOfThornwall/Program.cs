@@ -31,11 +31,11 @@ internal class LedgerProgram
 
     private static int UserInput()
     {
-        string input = Console.ReadLine();
+        string input = Console.ReadLine()!;
         while (input != "1" && input != "2" && input != "3" && input != "4" && input != "5")
         {
             Console.WriteLine("There is no such option. Try again.");
-            input = Console.ReadLine();
+            input = Console.ReadLine()!;
         }
         return Convert.ToInt32(input);
     }
@@ -54,13 +54,13 @@ internal class LedgerProgram
         {
             Console.WriteLine($"[1] {TransactionType.Income} [2] {TransactionType.Expense} [3] {TransactionType.Transfer}");
             Console.Write("Pick a transaction type: ");
-            string input = Console.ReadLine();
+            string input = Console.ReadLine()!;
 
             while (input != "1" && input != "2" && input != "3")
             {
                 Console.WriteLine("There's no such option.");
                 Console.Write("Pick a transaction type:");
-                input = Console.ReadLine();
+                input = Console.ReadLine()!;
             }
 
             return input switch
@@ -73,30 +73,30 @@ internal class LedgerProgram
 
         string GetDescription()
         {
+            Console.WriteLine();
             Console.Write("Transaction description: ");
-            string input = Console.ReadLine();
+            string input = Console.ReadLine()!;
             
-            while (input == "")
+            while (input == "" || input == null)
             {
                 Console.WriteLine("Description can not be empty.");
-                Console.WriteLine();
                 Console.Write("Transaction description: ");
-                input = Console.ReadLine();
+                input = Console.ReadLine()!;
             }
             return input;
         }
 
         decimal GetAmount()
         {
+            Console.WriteLine();
             Console.Write("Transaction amount (gp): ");
-            decimal input = Convert.ToDecimal(Console.ReadLine()); // I see the critical issue, it will be addressed in later chapters
+            decimal input = Convert.ToDecimal(Console.ReadLine() ?? "0"); // I see the critical issue, it will be addressed in later chapters
             
             while (input <= 0)
             {
                 Console.WriteLine("Amount must be a positive number.");
-                Console.WriteLine();
                 Console.Write("Transaction amount (gp): ");
-                input = Convert.ToDecimal(Console.ReadLine());
+                input = Convert.ToDecimal(Console.ReadLine() ?? "0"); // I see the critical issue, it will be addressed in later chapters
             }
 
             Console.Clear(); // clears the console before showing if transaction added or not
@@ -215,8 +215,8 @@ internal class Ledger
 internal class Transaction
 {
     public TransactionType TransactionType { get; }
-    public string Description { get; }
-    public decimal Amount { get; }
+    public string Description { get; } = "None";
+    public decimal Amount { get; } = 0;
 
     public Transaction() { }
 
