@@ -2,19 +2,15 @@
 
 internal class CardGame
 {
-    private Deck _deck = new Deck();
+    private readonly Deck _deck = new Deck();
     private Player[] _player;
 
     public CardGame() { }
 
     public void Run()
     {
-        Console.Write("How many players? ");
-        // I see the critical issue, it will be addressed after later chapters
-        _player = new Player[Convert.ToInt32(Console.ReadLine())];
-
-        int cardsHandSize = _deck.TotalCards / _player.Length;
-        CreatePlayers(cardsHandSize);
+        CreatePlayers();
+        int cardsHandSize = Deck.TotalCards / _player.Length;
 
         while (true) // game engine here
         {
@@ -36,8 +32,14 @@ internal class CardGame
         }
     }
 
-    private void CreatePlayers(int cardsHandSize)
+    private void CreatePlayers()
     {
+        Console.Write("How many players? ");
+        // I see the critical issue, it will be addressed after later chapters
+        _player = new Player[Convert.ToInt32(Console.ReadLine())];
+
+        int cardsHandSize = Deck.TotalCards / _player.Length;
+
         for (int i = 0; i < _player.Length; i++)
         {
             Console.Write($"Player {i + 1}, write your name: ");
@@ -131,7 +133,7 @@ internal class CardGame
         }
     }
 
-    private void DisplayRoundCard(string playerName, string card) => Console.WriteLine($"{playerName} plays {card}");
+    private static void DisplayRoundCard(string playerName, string card) => Console.WriteLine($"{playerName} plays {card}");
 
     private int DetermineRoundWinner(Card[] cards) // method to decide who won the round
     {
@@ -189,7 +191,7 @@ internal class CardGame
         return tie ? -1 : playerIndex;
     }
 
-    private bool AskReplay()
+    private static bool AskReplay()
     {
         Console.WriteLine();
         Console.Write("Do you want to play again (yes/no)? ");
@@ -247,8 +249,8 @@ internal class Player
 
 internal class Deck
 {
-    private readonly Card[] _cards = new Card[52];
-    public int TotalCards => _cards.Length; // fixed total cards
+    public static readonly int TotalCards = 52; // fixed total cards
+    private readonly Card[] _cards = new Card[TotalCards];
     private int _cardsInDeck = 0; // contains actual (without 0) number of cards in deck
 
     public Deck() 

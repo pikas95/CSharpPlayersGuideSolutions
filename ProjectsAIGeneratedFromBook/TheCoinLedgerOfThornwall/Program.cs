@@ -1,5 +1,4 @@
-﻿LedgerProgram program = new();
-program.Run();
+﻿new LedgerProgram().Run();
 
 internal class LedgerProgram
 {
@@ -21,7 +20,7 @@ internal class LedgerProgram
         }
     }
 
-    private void DisplayMenu()
+    private static void DisplayMenu()
     {
         Console.WriteLine("[1] Add Transaction   " +
                           "[2] View All   " +
@@ -30,7 +29,7 @@ internal class LedgerProgram
                           "[5] Quit");
     }
 
-    private int UserInput()
+    private static int UserInput()
     {
         string input = Console.ReadLine();
         while (input != "1" && input != "2" && input != "3" && input != "4" && input != "5")
@@ -147,7 +146,7 @@ internal class LedgerProgram
         BackToMenu();
     }
 
-    private void BackToMenu()
+    private static void BackToMenu()
     {
         Console.WriteLine();
         Console.WriteLine("Press enter to go back to menu.");
@@ -207,7 +206,7 @@ internal class Ledger
 
         for (int i = 0; i < Total; i++)
             if (largest.Amount < _transactions[i].Amount)
-                largest = _transactions[i];
+                largest = _transactions[i]; // TODO: copy array, don't give reference
 
         return largest;
     }
