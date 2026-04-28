@@ -1,0 +1,31 @@
+⚔️ Project 2 — The Arena of Suits
+Covers: enums, classes, information hiding, properties, arrays, loops, methods, switch expressions, value vs. reference semantics, char vs. string, int overflow
+Narrative: You are building a two-player card battle game. A standard 52-card deck is shuffled and split. Each round, both players reveal their top card. The higher card wins the round. After all cards are played, the player with more wins takes the title.
+
+Objectives
+Objective 1 — Card DNA
+Define two enums representing the suits and ranks of a standard deck. Ranks must carry a numeric value that can be used for comparison. Create a Card class that stores a suit and a rank. A card's suit and rank must never change after it is created. The class must be able to produce a human-readable description of itself, such as "Ace of Spades".
+
+
+Objective 2 — The Deck
+Create a Deck class that represents a full 52-card deck. On creation it must contain every combination of suit and rank exactly once. It must be able to shuffle its cards into a random order. It must be able to deal one card at a time. It must be able to report whether it has any cards left to deal.
+
+
+Objective 3 — The Player
+Create a Player class that represents one participant in the game. A player has a name that does not change. A player can receive cards into their hand. A player can play their next card from their hand. A player tracks how many rounds they have won. A player must be able to report whether they have any cards left to play.
+
+
+Objective 4 — The Arena
+Write the main game logic. Create two players and a deck. Deal the full deck evenly between them. Play all 26 rounds — each round both players reveal a card, the higher value wins the round, ties are announced. After all rounds, determine and announce the winner. Extract the winner determination into its own method that returns both the winner's name and their score as a bundle. Deconstruct and print the result.
+
+
+Objective 5 — Replay
+After each game ends, ask the players if they want to play again. The game must restart cleanly if they say yes. If they say no, the program exits.
+
+
+🔴 Edge Case — Objective 6: The Property Showdown
+Before finalising Card, experiment with four ways to expose the rank: a public field, a get/set auto-property, a get-only property, and an init-only property. Try to assign a new rank from outside the class in each case. Write a comment explaining which versions allowed it, which didn't, and why you chose the one you did.
+
+
+🔴 Edge Case — Objective 7: The Score Overflow
+Add a debug method that demonstrates what happens when you exceed the maximum value of an int. Then repeat the same operation using a long. Write a comment explaining the difference between the two types in terms of range, and describe a scenario where choosing int for a score would become a problem.
