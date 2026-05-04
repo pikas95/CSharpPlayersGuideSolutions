@@ -1,0 +1,56 @@
+⚔️ Project 3 — The Depths of Ashenveil
+Covers: multiple interacting classes, enums, tuples, properties with validation, 
+array manipulation, methods with overloading and recursion, switch expressions, 
+value vs. reference semantics, type conversions
+
+Narrative: Deep beneath the ruins of Ashenveil lies a dungeon that has 
+swallowed countless adventurers. You are building the system that runs it. 
+Design it well — the dungeon doesn't forgive sloppy architecture.
+
+Objectives
+
+Objective 1 — The World
+Design and implement a room system. Each room must have a description and 
+must know about its neighbouring rooms. A room can contain an enemy, an item, 
+or be empty. The dungeon must consist of at least 8 connected rooms. How you 
+connect them and what data structure you use to represent connections is your 
+decision — justify it in a comment.
+
+Objective 2 — The Adventurer
+Create a player. The player has a name, health, and an inventory with a fixed 
+capacity. The player can move between rooms, pick up items, and use them. If 
+health reaches zero, the game ends. What numeric type you use for health and 
+why is your decision — write a comment justifying it.
+
+Objective 3 — The Threat
+Create an enemy. Enemies have a name, health, and attack value. When the player 
+enters a room with a living enemy, combat must be resolved. How combat works — 
+turn order, damage calculation, whether the player has choices — is entirely up 
+to you. Design something you find interesting.
+
+Objective 4 — The Items
+Create at least three meaningfully different item types that share the same base 
+structure. Items must do something when used. What they do and how you model the 
+differences between them using only the tools from chapters 1–20 is your design problem.
+
+Objective 5 — The Game Loop
+Build a menu-driven game loop. The player must be able to move, inspect their 
+surroundings, manage inventory, and interact with whatever is in the room. The 
+game ends when the player dies or reaches a designated exit room. All input must 
+be validated — the program must never crash.
+
+Objective 6 — The Recursive Descent
+Write a method that counts the total number of rooms reachable from a given 
+starting room using recursion. Then write the same thing using a loop. Confirm 
+both give the same result. Write a comment on which was more natural for this 
+particular problem and why.
+
+🔴 Edge Case — Objective 7: The Reference Trap
+At some point during testing, copy a game object by assigning one variable to 
+another and mutate it. Observe what happens. Write a comment explaining what you 
+saw, why it happened, and how you fixed it or designed around it.
+
+🔴 Edge Case — Objective 8: The Tuple Decision
+At least one method in your program must return a tuple. After finishing the 
+project, write a comment asking yourself: was a tuple the right call there, or 
+would a small dedicated class have been cleaner? What was the deciding factor?
