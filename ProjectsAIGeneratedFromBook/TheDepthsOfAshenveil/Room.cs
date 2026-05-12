@@ -31,9 +31,5 @@
         return weapon;
     }
 
-    public void RoomUpdateEnemyDead()
-    {
-        if (Enemy?.Health <= 0)
-            Description += " (Dead)";
-    }
+    public void RoomUpdateEnemyDead() => Description += " (Dead)";
 }

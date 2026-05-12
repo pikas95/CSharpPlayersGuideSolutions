@@ -7,6 +7,7 @@
 
     public void RunGame()
     {
+        
         while (_player.Health > 0) 
         {
             Room currentRoom = _map.GetRoom(_player.Row, _player.Col);
@@ -17,7 +18,7 @@
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"You died from {currentRoom.Enemy.Name}...");
-                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.White;
                     break;
                 }
             }
@@ -36,7 +37,7 @@
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"Congratulations {_player.Name}, you came out the dungeon alive!");
-                Console.ForegroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
                 break;
             }
 
@@ -68,7 +69,7 @@
 
     private void DisplayCurrentRoom(Room room)
     {
-        if (room.Enemy != null)
+        if (room.Enemy?.Health > 0)
             Console.ForegroundColor = ConsoleColor.Red;
         else if (room.Weapon != null)
             Console.ForegroundColor = ConsoleColor.Green;
@@ -80,22 +81,22 @@
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    private bool DisplayInventory(Inventory[] inventory)
+    private void DisplayInventory(Inventory inventory)
     {
-        if (inventory[0]?.Weapon == null)
+        if (inventory.Weapons[0] == null)
         {
             Console.WriteLine("Inventory is empty");
             Console.WriteLine();
-            return false;
+        }
+        else
+        {
+            Console.WriteLine("Your inventory: ");
+            for (int i = 0; i < inventory.Weapons.Length; i++)
+                if (inventory.Weapons[i] != null)
+                    Console.WriteLine($"[{i + 1}] {inventory.Weapons[i]!.Name}");
         }
 
-        Console.WriteLine("Your inventory: ");
-        for (int i = 0; i < inventory.Length; i++)
-            if (inventory[i] != null)
-                Console.WriteLine($"[{i + 1}] {inventory[i].Weapon.Name}");
-
         Console.WriteLine();
-        return true;
     }
 
     private bool PlayerTurn(Room currentRoom)
@@ -117,7 +118,7 @@
                           $"[3] Move Down\n" +
                           $"[4] Move Left");
 
-            if (_player.Inventory[0] != null)
+            if (_player.Inventory.Weapons[0] != null)
             {
                 Console.WriteLine($"[5] Change Equiped Weapon");
                 Console.WriteLine($"[6] Remove Weapon From Inventory");
@@ -137,64 +138,89 @@
         {
             while (true)
             {
-                Console.Write($"{_player.Name}, what do you want to do? ");
-                int input = Convert.ToInt32(Console.ReadLine());
-
-                if (input >= 0 &&
-                    _player.Inventory[0] != null ? 
-                    (currentRoom.Weapon != null ? input <= 7 : input <= 6) :
-                    (currentRoom.Weapon != null ? input <= 4 || input == 7 : input <= 4))
+                int input = GetValidInput();
+            
+                switch (input)
                 {
-                    switch (input)
-                    {
-                        case 1: 
-                            {
-                                if (!MovePlayer(0, -1))
-                                    continue;
-                                break;
-                            }
-                        case 2:
-                            {
-                                if (!MovePlayer(1, 0))
-                                    continue;
-                                break;
-                            }
-                        case 3: 
-                            {
-                                if (!MovePlayer(0, 1))
-                                    continue;
-                                break;
-                            }
-                        case 4: 
-                            {
-                                if (!MovePlayer(-1, 0))
-                                    continue;
-                                break;
-                            }
-                        case 5: 
-                            _player.EquipWeapon(AskWeapon("Which weapon you wish to equip? "));
-                            break;
-                        case 6:
-                            _player.RemoveFromInventory(AskWeapon("Which weapon you wish to remove from inventory? "));
-                            break;
-                        case 7:
-                            _player.AddToInventory(currentRoom.TakeWeapon());
-                            break;
-                        case 0:
-                            return true;
-                        default: 
-                            break;
-                    };
+                    case 1:
+                        if (!MovePlayer(0, -1))
+                            continue;
+                        break;
+                    case 2:
+                        if (!MovePlayer(1, 0))
+                            continue;
+                        break;
+                    case 3:
+                        if (!MovePlayer(0, 1))
+                            continue;
+                        break;
+                    case 4:
+                        if (!MovePlayer(-1, 0))
+                            continue;
+                        break;
+                    case 5:
+                        _player.EquipWeapon(AskWeapon("Which weapon you wish to equip? "));
+                        break;
+                    case 6:
+                        _player.RemoveFromInventory(AskWeapon("Which weapon you wish to remove from inventory? "));
+                        break;
+                    case 7:
+                        _player.AddToInventory(currentRoom.TakeWeapon());
+                        break;
+                    case 0:
+                        return true;
+                    default:
+                        break;
+                };
 
-                    break;
-                }  
-                else Console.WriteLine("There's no such option.");
+                break;
             }
-
+            
             return false;
         }
 
-        bool MovePlayer(int row, int col)
+        int GetValidInput()
+        {
+            Console.Write($"{_player.Name}, what do you want to do? ");
+            int input = Convert.ToInt32(Console.ReadLine());
+
+            while (!IsValidAction(input))
+            {
+                Console.Write("There's no such option. Again: ");
+                input = Convert.ToInt32(Console.ReadLine());
+            }
+
+            return input;
+        }
+
+        bool IsValidAction(int input)
+        {
+            if (_player.Row == 0 && _player.Col == 0 && input >= 0 && EndRangeIsValid())
+                return true;
+            else if (input >= 1 && EndRangeIsValid())
+                return true;
+
+            return false;
+
+            bool EndRangeIsValid()
+            {
+                if (input <= 4)
+                    return true;
+                else if (_player.Inventory.Weapons[0] != null)
+                {
+                    if (currentRoom.Weapon != null && input <= 7)
+                        return true;
+                    else if (input <= 6)
+                        return true;
+                }
+                else if (currentRoom.Weapon != null && (input <= 4 || input == 7))
+                    return true;
+
+                return false;
+            }
+        }
+
+        bool MovePlayer(int col, int row)
         {
             if (_player.Row + row < 0 || 
                 _player.Col + col < 0 ||
@@ -205,7 +231,7 @@
                 return false;
             }
 
-            _player.Move(row, col);
+            _player.Move(col, row);
             return true;
         }
 
@@ -214,10 +240,10 @@
             Console.Write(description);
 
             while (true)
-            {
+            { // TODO: implement TryParse
                 int input = Convert.ToInt32(Console.ReadLine()) - 1; //  because weapons are displayed as index + 1
 
-                if (_player.Inventory[input]?.Weapon != null) 
+                if (input >= 0 && input < _player.Inventory.Weapons.Length && _player.Inventory.Weapons[input] != null) 
                     return input;
 
                 Console.Write("There is no such weapon. Again: ");
@@ -246,7 +272,7 @@
             Console.WriteLine("[1] Stab Attack " +
                               "[2] Power Attack");
 
-            int input = Convert.ToInt32(Console.ReadLine());
+            int input = Convert.ToInt32(Console.ReadLine()); // TODO: implement TryParse
 
             while (input != 1 && input != 2)
             {
@@ -256,14 +282,15 @@
 
             int playerDamage = input switch
             {
-                1 => _player.StabAttack(),
-                2 => _player.PowerAttack(),
-                _ => _player.StabAttack(),
+                1 => player.StabAttack(),
+                2 => player.PowerAttack(),
+                _ => player.StabAttack(),
             };
 
             room.Enemy.ReceiveDamage(playerDamage);
-
-            player.ReceiveDamage(room.Enemy.Attack());
+            
+            if (room.Enemy.Health > 0)
+                player.ReceiveDamage(room.Enemy.Attack());
         }
 
         Console.Clear();

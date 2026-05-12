@@ -5,11 +5,13 @@
         Random random = new Random();
         Room[,] rooms = new Room[dungeonSize / 2, dungeonSize / 2];
 
-        for (int row = 0; row < dungeonSize / 2; row++)
+        rooms[0, 0] = SetEmpty();
+
+        for (int col = 0; col < dungeonSize / 2; col++)
         {
-            for (int col = 0; col < dungeonSize / 2; col++)
+            for (int row = (col == 0 ? 1 : 0); row < dungeonSize / 2; row++)
             {
-                rooms[row, col] = random.Next(0, 5) switch
+                rooms[col, row] = random.Next(0, 5) switch
                 {
                     0 => SetEnemy(),
                     1 => SetWeapon(),

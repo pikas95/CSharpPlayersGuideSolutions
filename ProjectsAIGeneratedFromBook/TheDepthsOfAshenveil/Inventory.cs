@@ -1,19 +1,52 @@
 ﻿internal class Inventory
 {
-    public Weapon Weapon { get; private set; } = null!;
+    public Weapon?[] Weapons { get; private set; }
+    public Inventory(int inventorySize) => Weapons = new Weapon[inventorySize];
 
-    public Inventory() { }
-    public Inventory(Weapon weapon) => Weapon = weapon;
-
-    public void TryAdd(Weapon weapon)
+    public bool TryAdd(Weapon weapon)
     {
-        if (Weapon == null) Weapon = weapon;
+        for (int i = 0; i < Weapons.Length; i++)
+        {
+            if (Weapons[i] == null)
+            {
+                Weapons[i] = weapon;
+                return true;
+            }
+        }
+        return false;
     }
-    public void Remove() => Weapon = null!;
-    public Weapon Take()
+    public bool Remove(int index)
     {
-        Weapon weapon = Weapon!;
-        Remove();
+        if (Weapons[index] == null)
+            return false;
+
+        Weapons[index] = null;
+        SortInventory();
+        return true;
+    }
+    public Weapon Take(int index)
+    {
+        Weapon weapon = Weapons[index]!;
+        Remove(index);
         return weapon;
+    }
+
+    private void SortInventory()
+    {
+        for (int i = 0; i < Weapons.Length; i++)
+        {
+            if (Weapons[i] == null)
+            {
+                for (int j = i + 1; j < Weapons.Length; j++)
+                {
+                    if (Weapons[j] != null)
+                    {
+                        Weapons[i] = Weapons[j];
+                        Weapons[j] = null;
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

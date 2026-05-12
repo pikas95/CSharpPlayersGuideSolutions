@@ -2,83 +2,58 @@
 {
     public string Name { get; } = "Unknown";
     public int Health { get; private set; } = 20;
-    public int Row { get; private set; } = 0;
     public int Col { get; private set; } = 0;
-    public Inventory[] Inventory { get; private set; } = new Inventory[5];
+    public int Row { get; private set; } = 0;
+    public Inventory Inventory { get; private set; } 
     public Weapon EquipedWeapon { get; private set; }
+    private static readonly Random _random = new Random();
 
     public Player(string name, Weapon weapon)
     {
         Name = name;
         EquipedWeapon = weapon;
+        Inventory = new Inventory(5);
     }
 
-    public Inventory[] GetInventory() => Inventory[0..^1];
+    public bool AddToInventory(Weapon weapon) => Inventory.TryAdd(weapon);
 
-    public bool AddToInventory(Weapon weapon) // TODO: add remove from inventory method (refactor other objects that checks inventory)
+    public bool RemoveFromInventory(int index) => Inventory.Remove(index);
+
+    public bool EquipWeapon(int weaponIndex)
     {
-        for (int i = 0; i < Inventory.Length; i++)
-        {
-            if (Inventory[i]?.Weapon == null)
-            {
-                Inventory[i] = new Inventory(weapon);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public bool RemoveFromInventory(int index)
-    {
-        if (Inventory[index]?.Weapon == null)
-            return false;
-
-        Inventory[index] = null!;
-        SortInventory();
-        return true;
-    }
-
-    private void SortInventory()
-    {
-        for (int i = 0; i < Inventory.Length - 1; i++)
-        {
-            if (Inventory[i]?.Weapon == null && Inventory[i + 1]?.Weapon != null)
-            {
-                Inventory[i] = Inventory[i + 1];
-                Inventory[i + 1] = null!;
-            }
-        }
-    }
-
-    public bool EquipWeapon(int invIndex)
-    {
-        if (Inventory[invIndex] == null)
+        if (Inventory.Weapons[weaponIndex] == null)
             return false;
         else
         {
             Weapon temp = EquipedWeapon;
-            EquipedWeapon = Inventory[invIndex].Take();
-            Inventory[invIndex].TryAdd(temp);
+            EquipedWeapon = Inventory.Take(weaponIndex);
+            Inventory.TryAdd(temp);
         }
 
         return true;
     }
 
-    public void Move(int row, int col)
+    public void Move(int col, int row)
     {
-        Row += row;
         Col += col;
+        Row += row;
     }
 
     public int StabAttack()
     {
-        return new Random().Next(EquipedWeapon.DamageMin + 2, EquipedWeapon.DamageMax - 2);
+        int damageAddon = (EquipedWeapon.DamageMax - EquipedWeapon.DamageMin) / 3;
+
+        return _random.Next(EquipedWeapon.DamageMin + damageAddon, EquipedWeapon.DamageMax - damageAddon);
     }
 
     public int PowerAttack()
     {
-        return new Random().Next(0, EquipedWeapon.DamageMax + 3);
+        int damageAddon = 0;
+
+        if (EquipedWeapon.DamageMax < 20)
+            damageAddon = (EquipedWeapon.DamageMax - EquipedWeapon.DamageMin) / 3;
+
+        return _random.Next(0, EquipedWeapon.DamageMax + damageAddon);
     }
 
     public void ReceiveDamage(int damage) => Health -= damage;
