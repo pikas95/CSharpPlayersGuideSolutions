@@ -4,7 +4,6 @@
     public int Health { get; private set; } = 20;
     public int Row { get; private set; } = 0;
     public int Col { get; private set; } = 0;
-    public bool IsAlive { get; private set; } = true;
     public Inventory[] Inventory { get; private set; } = new Inventory[5];
     public Weapon EquipedWeapon { get; private set; }
 
@@ -71,4 +70,16 @@
         Row += row;
         Col += col;
     }
+
+    public int StabAttack()
+    {
+        return new Random().Next(EquipedWeapon.DamageMin + 2, EquipedWeapon.DamageMax - 2);
+    }
+
+    public int PowerAttack()
+    {
+        return new Random().Next(0, EquipedWeapon.DamageMax + 3);
+    }
+
+    public void ReceiveDamage(int damage) => Health -= damage;
 }

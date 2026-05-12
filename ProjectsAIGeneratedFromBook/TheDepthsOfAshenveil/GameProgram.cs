@@ -7,24 +7,38 @@
 
     public void RunGame()
     {
-        while (_player.IsAlive) 
+        while (_player.Health > 0) 
         {
             Room currentRoom = _map.GetRoom(_player.Row, _player.Col);
+
+            if (currentRoom.Enemy?.Health > 0)
+            {
+                if (!FightEnemy(currentRoom, _player))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"You died from {currentRoom.Enemy.Name}...");
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    break;
+                }
+            }
+
+            // displays player health and weapon
+            DisplayPlayerStats();
 
             // displays room player is in
             DisplayCurrentRoom(currentRoom);
 
-            // displays equiped weapon
-            DisplayEquipedWeapon(_player.EquipedWeapon);
-
             // displays player's inventory
-            DisplayInventory(_player.Inventory);
+            DisplayInventory(_player.Inventory);    
 
-            //if (currentRoom._enemy != null)
-            //    if (FightEnemy())
-            //        PlayerDied();
-
-            PlayerTurn(currentRoom);
+            if (PlayerTurn(currentRoom))
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Congratulations {_player.Name}, you came out the dungeon alive!");
+                Console.ForegroundColor = ConsoleColor.Black;
+                break;
+            }
 
             Console.Clear();
         }
@@ -42,13 +56,28 @@
         }
 
         Console.Clear();
-        return new Player(input, new Weapon("Rusty Sword", 2, 5));
+        return new Player(input, new Weapon("Rusty Sword", 1, 5));
+    }
+
+    private void DisplayPlayerStats()
+    {
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine($"Health: {_player.Health} | Weapon: {_player.EquipedWeapon.Name}");
+        Console.ForegroundColor = ConsoleColor.White;
     }
 
     private void DisplayCurrentRoom(Room room)
     {
+        if (room.Enemy != null)
+            Console.ForegroundColor = ConsoleColor.Red;
+        else if (room.Weapon != null)
+            Console.ForegroundColor = ConsoleColor.Green;
+        else 
+            Console.ForegroundColor = ConsoleColor.Gray;
+
         Console.WriteLine($"Your surroundings: {room.Description}");
         Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.White;
     }
 
     private bool DisplayInventory(Inventory[] inventory)
@@ -69,49 +98,52 @@
         return true;
     }
 
-    private void DisplayEquipedWeapon(Weapon weapon)
-    {
-        Console.WriteLine($"Equiped weapon: {weapon.Name}");
-    }
-
-    private void PlayerTurn(Room currentRoom)
+    private bool PlayerTurn(Room currentRoom)
     {
         DisplayActions();
-        MakeTurn();
+
+        if (MakeTurn())
+            return true;
+        return false;
         
         void DisplayActions()
         {
             Console.WriteLine("You can do:");
 
-            int menuOption = 1;
-            Console.WriteLine($"[{menuOption++}] Move Up\n" +
-                          $"[{menuOption++}] Move Right\n" +
-                          $"[{menuOption++}] Move Down\n" +
-                          $"[{menuOption++}] Move Left");
+            Console.ForegroundColor = ConsoleColor.DarkMagenta;
 
-            if (currentRoom.Weapon != null)
-                Console.WriteLine($"[{menuOption++}] Collect Item");
+            Console.WriteLine($"[1] Move Up\n" +
+                          $"[2] Move Right\n" +
+                          $"[3] Move Down\n" +
+                          $"[4] Move Left");
 
             if (_player.Inventory[0] != null)
             {
-                Console.WriteLine($"[{menuOption++}] Change Equiped Weapon");
-                Console.WriteLine("[0] Remove Weapon From Inventory");
+                Console.WriteLine($"[5] Change Equiped Weapon");
+                Console.WriteLine($"[6] Remove Weapon From Inventory");
             }
 
+            if (currentRoom.Weapon != null)
+                Console.WriteLine($"[7] Collect Item");
+
+            if (_player.Row == 0 && _player.Col == 0)
+                Console.WriteLine("[0] Exit Dungeon");
+
             Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
-        void MakeTurn()
+        bool MakeTurn()
         {
             while (true)
             {
                 Console.Write($"{_player.Name}, what do you want to do? ");
                 int input = Convert.ToInt32(Console.ReadLine());
 
-                if ((_player.Inventory[0] != null ? input >= 0 : input >= 1) &&
-                    (currentRoom.Weapon != null ? 
-                    (_player.Inventory[0] != null ? input <= 6 : input <= 5) :
-                    (_player.Inventory[0] != null ? input <= 5 : input <= 4)))
+                if (input >= 0 &&
+                    _player.Inventory[0] != null ? 
+                    (currentRoom.Weapon != null ? input <= 7 : input <= 6) :
+                    (currentRoom.Weapon != null ? input <= 4 || input == 7 : input <= 4))
                 {
                     switch (input)
                     {
@@ -140,26 +172,16 @@
                                 break;
                             }
                         case 5: 
-                            {
-                                if (currentRoom.Weapon != null)
-                                    _player.AddToInventory(currentRoom.TakeWeapon());
-                                else
-                                    _player.EquipWeapon(AskWeapon("Which weapon you wish to equip? "));
-
-                                break;
-                            }
-                        case 6:
                             _player.EquipWeapon(AskWeapon("Which weapon you wish to equip? "));
                             break;
+                        case 6:
+                            _player.RemoveFromInventory(AskWeapon("Which weapon you wish to remove from inventory? "));
+                            break;
+                        case 7:
+                            _player.AddToInventory(currentRoom.TakeWeapon());
+                            break;
                         case 0:
-                            {
-                                if (!_player.RemoveFromInventory(AskWeapon("Which weapon you wish to remove from inventory? ")))
-                                {
-                                    Console.WriteLine("There's no such item");
-                                    continue;
-                                }
-                                break;
-                            }
+                            return true;
                         default: 
                             break;
                     };
@@ -168,6 +190,8 @@
                 }  
                 else Console.WriteLine("There's no such option.");
             }
+
+            return false;
         }
 
         bool MovePlayer(int row, int col)
@@ -199,5 +223,63 @@
                 Console.Write("There is no such weapon. Again: ");
             }
         }
+    }
+
+    private bool FightEnemy(Room room, Player player)
+    {
+        Console.Clear();
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"{player.Name}, you have entered {room.Name}.");
+        Console.WriteLine($"{room.Enemy!.Name} has noticed you and began running towards you!");
+        Console.ForegroundColor = ConsoleColor.White;
+
+        Console.Write("Press enter to begin battle");
+        Console.ReadLine();
+
+        while (player.Health > 0 && room.Enemy.Health > 0)
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Your health: {player.Health} | {room.Enemy.Name} health: {room.Enemy.Health}");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            Console.WriteLine("[1] Stab Attack " +
+                              "[2] Power Attack");
+
+            int input = Convert.ToInt32(Console.ReadLine());
+
+            while (input != 1 && input != 2)
+            {
+                Console.Write("There is no such attack. Again: ");
+                input = Convert.ToInt32(Console.ReadLine());
+            }
+
+            int playerDamage = input switch
+            {
+                1 => _player.StabAttack(),
+                2 => _player.PowerAttack(),
+                _ => _player.StabAttack(),
+            };
+
+            room.Enemy.ReceiveDamage(playerDamage);
+
+            player.ReceiveDamage(room.Enemy.Attack());
+        }
+
+        Console.Clear();
+
+        if (player.Health <= 0)
+            return false;
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"You have killed {room.Enemy.Name}!");
+        Console.ForegroundColor = ConsoleColor.White;
+
+        room.RoomUpdateEnemyDead();
+        Console.Write("Press enter to continue");
+        Console.ReadLine();
+        Console.Clear();
+
+        return true;
     }
 }

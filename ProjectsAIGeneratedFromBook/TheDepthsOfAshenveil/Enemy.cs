@@ -4,7 +4,6 @@
     public int Health { get; private set; }
     private int _damageMin;
     private int _damageMax;
-    public bool IsAlive { get; private set; } = true;
 
     public Enemy(string name, int health, int damageMin, int damageMax)
     {
@@ -13,4 +12,8 @@
         _damageMin = damageMin;
         _damageMax = damageMax;
     }
+
+    public int Attack() => new Random().Next(_damageMin, _damageMax);
+
+    public void ReceiveDamage(int damage) => Health -= damage;
 }
