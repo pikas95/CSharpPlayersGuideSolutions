@@ -30,4 +30,6 @@
 
         return roomsNearby;
     }
+
+    public int EdgeNumber() => _rooms.GetLength(0);
 }

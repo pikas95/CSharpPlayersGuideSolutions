@@ -9,12 +9,12 @@
         {
             for (int col = 0; col < dungeonSize / 2; col++)
             {
-                switch (random.Next(0, 5))
+                rooms[row, col] = random.Next(0, 5) switch
                 {
-                    case 0: rooms[row, col] = SetEnemy(); break;
-                    case 1: rooms[row, col] = SetWeapon(); break;
-                    default: rooms[row, col] = SetEmpty(); break;
-                }
+                    0 => SetEnemy(),
+                    1 => SetWeapon(),
+                    _ => SetEmpty()
+                };
             }
         }
 

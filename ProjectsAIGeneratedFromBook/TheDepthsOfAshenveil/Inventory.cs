@@ -8,7 +8,6 @@
     public void TryAdd(Weapon weapon)
     {
         if (Weapon == null) Weapon = weapon;
-
     }
     public void Remove() => Weapon = null!;
     public Weapon Take()

@@ -16,7 +16,7 @@
 
     public Inventory[] GetInventory() => Inventory[0..^1];
 
-    public bool AddToInventory(Weapon weapon)
+    public bool AddToInventory(Weapon weapon) // TODO: add remove from inventory method (refactor other objects that checks inventory)
     {
         for (int i = 0; i < Inventory.Length; i++)
         {
@@ -28,6 +28,28 @@
         }
 
         return false;
+    }
+
+    public bool RemoveFromInventory(int index)
+    {
+        if (Inventory[index]?.Weapon == null)
+            return false;
+
+        Inventory[index] = null!;
+        SortInventory();
+        return true;
+    }
+
+    private void SortInventory()
+    {
+        for (int i = 0; i < Inventory.Length - 1; i++)
+        {
+            if (Inventory[i]?.Weapon == null && Inventory[i + 1]?.Weapon != null)
+            {
+                Inventory[i] = Inventory[i + 1];
+                Inventory[i + 1] = null!;
+            }
+        }
     }
 
     public bool EquipWeapon(int invIndex)

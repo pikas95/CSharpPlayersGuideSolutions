@@ -2,18 +2,18 @@
 {
     public string Name { get; }
     public string Description { get; private set; }
-    public Enemy? _enemy = null;
-    public Weapon? _weapon = null;
+    public Enemy? Enemy { get; private set; } = null;
+    public Weapon? Weapon { get; private set; } = null;
 
     public Room(Enemy enemy)
     {
-        _enemy = enemy;
+        Enemy = enemy;
         Name = $"{enemy.Name} cave";
         Description = $"Filthy {Name}";
     }
     public Room(Weapon weapon)
     {
-        _weapon = weapon;
+        Weapon = weapon;
         Name = $"{weapon.Name} tomb";
         Description = $"Forgotten tomb of {weapon.Name} treasure";
     }
@@ -25,9 +25,9 @@
 
     public Weapon TakeWeapon()
     {
-        Weapon weapon = _weapon!;
-        _weapon = null;
-        Description += " (Cleared)";
+        Weapon weapon = Weapon!;
+        Weapon = null;
+        Description += " (Claimed)";
         return weapon;
     }
 }

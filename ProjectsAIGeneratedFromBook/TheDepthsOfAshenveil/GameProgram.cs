@@ -3,28 +3,22 @@
     private readonly Map _map = new Map();
     private Player _player;
 
+    public GameProgram() => _player = CreatePlayer();
+
     public void RunGame()
     {
-        _player = CreatePlayer();
-
-        while (_player.IsAlive)
+        while (_player.IsAlive) 
         {
             Room currentRoom = _map.GetRoom(_player.Row, _player.Col);
 
             // displays room player is in
-            Console.Write("Your surroundings: ");
-            DisplayRoomInstance(currentRoom);
-            Console.WriteLine();
+            DisplayCurrentRoom(currentRoom);
 
-            // displays player's inventory
-            Console.Write("Your inventory: ");
-            if (!DisplayInventory(_player.Inventory))
-                Console.WriteLine("Inventory is empty");
-            Console.WriteLine();
-            
             // displays equiped weapon
             DisplayEquipedWeapon(_player.EquipedWeapon);
-            Console.WriteLine();
+
+            // displays player's inventory
+            DisplayInventory(_player.Inventory);
 
             //if (currentRoom._enemy != null)
             //    if (FightEnemy())
@@ -41,48 +35,68 @@
         Console.Write("What's your name? ");
         string input = Console.ReadLine()!;
 
-        if (input == null || input == "")
-            input = "Unknown";
+        while (input == null || input == "")
+        {
+            Console.Write("Name can not be empty. ");
+            input = Console.ReadLine()!;
+        }
 
         Console.Clear();
         return new Player(input, new Weapon("Rusty Sword", 2, 5));
     }
 
-    private void DisplayRoomInstance(Room room) => Console.WriteLine(room.Description);
+    private void DisplayCurrentRoom(Room room)
+    {
+        Console.WriteLine($"Your surroundings: {room.Description}");
+        Console.WriteLine();
+    }
 
     private bool DisplayInventory(Inventory[] inventory)
     {
         if (inventory[0]?.Weapon == null)
+        {
+            Console.WriteLine("Inventory is empty");
+            Console.WriteLine();
             return false;
+        }
 
-        Console.WriteLine();
+        Console.WriteLine("Your inventory: ");
         for (int i = 0; i < inventory.Length; i++)
             if (inventory[i] != null)
                 Console.WriteLine($"[{i + 1}] {inventory[i].Weapon.Name}");
 
+        Console.WriteLine();
         return true;
     }
 
-    private void DisplayEquipedWeapon(Weapon weapon) => Console.WriteLine($"Equiped weapon: {weapon.Name}");
+    private void DisplayEquipedWeapon(Weapon weapon)
+    {
+        Console.WriteLine($"Equiped weapon: {weapon.Name}");
+    }
 
     private void PlayerTurn(Room currentRoom)
     {
         DisplayActions();
         MakeTurn();
         
-
         void DisplayActions()
         {
-            Console.WriteLine("[1] Move Nouth\n" +
-                          "[2] Move East\n" +
-                          "[3] Move South\n" +
-                          "[4] Move West");
+            Console.WriteLine("You can do:");
+
+            int menuOption = 1;
+            Console.WriteLine($"[{menuOption++}] Move Up\n" +
+                          $"[{menuOption++}] Move Right\n" +
+                          $"[{menuOption++}] Move Down\n" +
+                          $"[{menuOption++}] Move Left");
+
+            if (currentRoom.Weapon != null)
+                Console.WriteLine($"[{menuOption++}] Collect Item");
 
             if (_player.Inventory[0] != null)
-                Console.WriteLine("[5] Change Equiped Weapon");
-
-            if (currentRoom._weapon != null)
-                Console.WriteLine("[6] Collect Item");
+            {
+                Console.WriteLine($"[{menuOption++}] Change Equiped Weapon");
+                Console.WriteLine("[0] Remove Weapon From Inventory");
+            }
 
             Console.WriteLine();
         }
@@ -94,19 +108,60 @@
                 Console.Write($"{_player.Name}, what do you want to do? ");
                 int input = Convert.ToInt32(Console.ReadLine());
 
-                if (input >= 1 &&
-                    currentRoom._weapon != null ? input <= 6 :
-                    _player.Inventory[0] != null ? input <= 5 : input <= 4)
+                if ((_player.Inventory[0] != null ? input >= 0 : input >= 1) &&
+                    (currentRoom.Weapon != null ? 
+                    (_player.Inventory[0] != null ? input <= 6 : input <= 5) :
+                    (_player.Inventory[0] != null ? input <= 5 : input <= 4)))
                 {
                     switch (input)
                     {
-                        case 1: MovePlayer(0, -1); break;
-                        case 2: MovePlayer(1, 0); break;
-                        case 3: MovePlayer(0, 1); break;
-                        case 4: MovePlayer(-1, 0); break;
-                        case 5: _player.EquipWeapon(AskWeapon()); break;
-                        case 6: _player.AddToInventory(currentRoom.TakeWeapon()); break;
-                        default: break;
+                        case 1: 
+                            {
+                                if (!MovePlayer(0, -1))
+                                    continue;
+                                break;
+                            }
+                        case 2:
+                            {
+                                if (!MovePlayer(1, 0))
+                                    continue;
+                                break;
+                            }
+                        case 3: 
+                            {
+                                if (!MovePlayer(0, 1))
+                                    continue;
+                                break;
+                            }
+                        case 4: 
+                            {
+                                if (!MovePlayer(-1, 0))
+                                    continue;
+                                break;
+                            }
+                        case 5: 
+                            {
+                                if (currentRoom.Weapon != null)
+                                    _player.AddToInventory(currentRoom.TakeWeapon());
+                                else
+                                    _player.EquipWeapon(AskWeapon("Which weapon you wish to equip? "));
+
+                                break;
+                            }
+                        case 6:
+                            _player.EquipWeapon(AskWeapon("Which weapon you wish to equip? "));
+                            break;
+                        case 0:
+                            {
+                                if (!_player.RemoveFromInventory(AskWeapon("Which weapon you wish to remove from inventory? ")))
+                                {
+                                    Console.WriteLine("There's no such item");
+                                    continue;
+                                }
+                                break;
+                            }
+                        default: 
+                            break;
                     };
 
                     break;
@@ -115,19 +170,33 @@
             }
         }
 
-        void MovePlayer(int row, int col) => _player.Move(row, col);
-
-        int AskWeapon()
+        bool MovePlayer(int row, int col)
         {
-            Console.Write("Which weapon you wish to equip? ");
+            if (_player.Row + row < 0 || 
+                _player.Col + col < 0 ||
+                _player.Row + row >= _map.EdgeNumber() || 
+                _player.Col + col >= _map.EdgeNumber())
+            {
+                Console.WriteLine("You bumped into a wall..");
+                return false;
+            }
+
+            _player.Move(row, col);
+            return true;
+        }
+
+        int AskWeapon(string description)
+        {
+            Console.Write(description);
+
             while (true)
             {
-                int input = Convert.ToInt32(Console.ReadLine()) - 1;//  because inventory items are displayed as index + 1
+                int input = Convert.ToInt32(Console.ReadLine()) - 1; //  because weapons are displayed as index + 1
 
-                if (input >= 0 || input < _player.Inventory.Length) 
+                if (_player.Inventory[input]?.Weapon != null) 
                     return input;
 
-                Console.WriteLine("There is no such weapon");
+                Console.Write("There is no such weapon. Again: ");
             }
         }
     }
