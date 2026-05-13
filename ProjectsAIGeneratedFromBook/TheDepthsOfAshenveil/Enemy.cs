@@ -2,8 +2,8 @@
 {
     public string Name { get; }
     public int Health { get; private set; }
-    private int _damageMin;
-    private int _damageMax;
+    private readonly int _damageMin;
+    private readonly int _damageMax;
     private static readonly Random _random = new Random();
 
     public Enemy(string name, int health, int damageMin, int damageMax)

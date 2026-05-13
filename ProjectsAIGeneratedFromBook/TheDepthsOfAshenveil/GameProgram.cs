@@ -63,7 +63,7 @@
     private void DisplayPlayerStats()
     {
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($"{_player.Name} | Health: {_player.Health} | Weapon: {_player.EquipedWeapon.Name}");
+        Console.WriteLine($"{_player.Name} | Health: {_player.Health} | Weapon: {_player.EquippedWeapon.Name}");
         Console.ForegroundColor = ConsoleColor.White;
     }
 
@@ -166,8 +166,6 @@
                         break;
                     case 0:
                         return true;
-                    default:
-                        break;
                 };
 
                 break;
@@ -221,8 +219,8 @@
         {
             if (_player.Row + row < 0 || 
                 _player.Col + col < 0 ||
-                _player.Row + row >= _map.EdgeNumber() || 
-                _player.Col + col >= _map.EdgeNumber())
+                _player.Row + row >= _map.Size || 
+                _player.Col + col >= _map.Size)
             {
                 Console.WriteLine("You bumped into a wall..");
                 return false;
@@ -299,7 +297,7 @@
         Console.WriteLine($"You have killed {room.Enemy.Name}!");
         Console.ForegroundColor = ConsoleColor.White;
 
-        room.RoomUpdateEnemyDead();
+        room.MarkEnemyDead();
         Console.Write("Press enter to continue");
         Console.ReadLine();
         Console.Clear();

@@ -1,14 +1,13 @@
 ﻿internal class Map
 {
     private readonly Room[,] _rooms;
+    public int Size { get; }
 
     public Map()
     {
-        int dungeonSize = new Random().Next(8, 16);
-        _rooms = RoomGenerator.Generate(dungeonSize);
+        Size = new Random().Next(8, 16);
+        _rooms = RoomGenerator.Generate(Size);
     }
 
     public Room GetRoom(int col, int row) => _rooms[col, row];
-
-    public int EdgeNumber() => _rooms.GetLength(0);
 }

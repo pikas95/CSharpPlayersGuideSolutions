@@ -31,5 +31,5 @@
         return weapon;
     }
 
-    public void RoomUpdateEnemyDead() => Description += " (Dead)";
+    public void MarkEnemyDead() => Description += " (Dead)";
 }
