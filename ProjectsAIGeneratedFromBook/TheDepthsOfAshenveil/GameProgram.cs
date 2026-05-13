@@ -1,7 +1,7 @@
 ﻿internal class GameProgram
 {
     private readonly Map _map = new Map();
-    private Player _player;
+    private readonly Player _player;
 
     public GameProgram() => _player = CreatePlayer();
 
@@ -14,7 +14,7 @@
 
             if (currentRoom.Enemy?.Health > 0)
             {
-                if (!FightEnemy(currentRoom, _player))
+                if (!FightEnemy(currentRoom))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"You died from {currentRoom.Enemy.Name}...");
@@ -45,7 +45,7 @@
         }
     }
 
-    private Player CreatePlayer()
+    private static Player CreatePlayer()
     {
         Console.Write("What's your name? ");
         string input = Console.ReadLine()!;
@@ -63,11 +63,11 @@
     private void DisplayPlayerStats()
     {
         Console.ForegroundColor = ConsoleColor.Blue;
-        Console.WriteLine($"Health: {_player.Health} | Weapon: {_player.EquipedWeapon.Name}");
+        Console.WriteLine($"{_player.Name} | Health: {_player.Health} | Weapon: {_player.EquipedWeapon.Name}");
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    private void DisplayCurrentRoom(Room room)
+    private static void DisplayCurrentRoom(Room room)
     {
         if (room.Enemy?.Health > 0)
             Console.ForegroundColor = ConsoleColor.Red;
@@ -81,13 +81,10 @@
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    private void DisplayInventory(Inventory inventory)
+    private static void DisplayInventory(Inventory inventory)
     {
         if (inventory.Weapons[0] == null)
-        {
             Console.WriteLine("Inventory is empty");
-            Console.WriteLine();
-        }
         else
         {
             Console.WriteLine("Your inventory: ");
@@ -111,7 +108,7 @@
         {
             Console.WriteLine("You can do:");
 
-            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            Console.ForegroundColor = ConsoleColor.Magenta;
 
             Console.WriteLine($"[1] Move Up\n" +
                           $"[2] Move Right\n" +
@@ -182,12 +179,12 @@
         int GetValidInput()
         {
             Console.Write($"{_player.Name}, what do you want to do? ");
-            int input = Convert.ToInt32(Console.ReadLine());
+            int input = Convert.ToInt32(Console.ReadLine()); // TODO: implement TryParse
 
             while (!IsValidAction(input))
             {
                 Console.Write("There's no such option. Again: ");
-                input = Convert.ToInt32(Console.ReadLine());
+                input = Convert.ToInt32(Console.ReadLine()); // TODO: implement TryParse
             }
 
             return input;
@@ -213,7 +210,7 @@
                     else if (input <= 6)
                         return true;
                 }
-                else if (currentRoom.Weapon != null && (input <= 4 || input == 7))
+                else if (currentRoom.Weapon != null && input == 7)
                     return true;
 
                 return false;
@@ -251,22 +248,22 @@
         }
     }
 
-    private bool FightEnemy(Room room, Player player)
+    private bool FightEnemy(Room room)
     {
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{player.Name}, you have entered {room.Name}.");
+        Console.WriteLine($"{_player.Name}, you have entered {room.Name}.");
         Console.WriteLine($"{room.Enemy!.Name} has noticed you and began running towards you!");
         Console.ForegroundColor = ConsoleColor.White;
 
         Console.Write("Press enter to begin battle");
         Console.ReadLine();
 
-        while (player.Health > 0 && room.Enemy.Health > 0)
+        while (_player.Health > 0 && room.Enemy.Health > 0)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine($"Your health: {player.Health} | {room.Enemy.Name} health: {room.Enemy.Health}");
+            Console.WriteLine($"Your health: {_player.Health} | {room.Enemy.Name} health: {room.Enemy.Health}");
             Console.ForegroundColor = ConsoleColor.White;
 
             Console.WriteLine("[1] Stab Attack " +
@@ -277,25 +274,25 @@
             while (input != 1 && input != 2)
             {
                 Console.Write("There is no such attack. Again: ");
-                input = Convert.ToInt32(Console.ReadLine());
+                input = Convert.ToInt32(Console.ReadLine()); // TODO: implement TryParse
             }
 
             int playerDamage = input switch
             {
-                1 => player.StabAttack(),
-                2 => player.PowerAttack(),
-                _ => player.StabAttack(),
+                1 => _player.StabAttack(),
+                2 => _player.PowerAttack(),
+                _ => _player.StabAttack(),
             };
 
             room.Enemy.ReceiveDamage(playerDamage);
             
             if (room.Enemy.Health > 0)
-                player.ReceiveDamage(room.Enemy.Attack());
+                _player.ReceiveDamage(room.Enemy.Attack());
         }
 
         Console.Clear();
 
-        if (player.Health <= 0)
+        if (_player.Health <= 0)
             return false;
 
         Console.ForegroundColor = ConsoleColor.Green;
