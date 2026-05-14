@@ -69,12 +69,7 @@
 
     private static void DisplayCurrentRoom(Room room)
     {
-        if (room is EnemyRoom enemyRoom && enemyRoom.Enemy.Health > 0)
-            Console.ForegroundColor = ConsoleColor.Red;
-        else if (room is WeaponRoom weaponRoom && weaponRoom.Weapon != null)
-            Console.ForegroundColor = ConsoleColor.Green;
-        else 
-            Console.ForegroundColor = ConsoleColor.Gray;
+        Console.ForegroundColor = room.DisplayColor();
 
         Console.WriteLine($"Your surroundings: {room.Description}");
         Console.WriteLine();
@@ -251,7 +246,7 @@
     private bool FightEnemy(EnemyRoom room)
     {
         Console.Clear();
-        Console.ForegroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = room.DisplayColor();
         Console.WriteLine($"{_player.Name}, you have entered {room.Name}.");
         Console.WriteLine($"{room.Enemy.Name} has noticed you and began running towards you!");
         Console.ForegroundColor = ConsoleColor.White;

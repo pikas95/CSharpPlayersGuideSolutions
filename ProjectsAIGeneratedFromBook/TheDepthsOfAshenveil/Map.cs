@@ -5,7 +5,7 @@
 
     public Map()
     {
-        int dungeonSize = new Random().Next(8, 16);
+        int dungeonSize= new Random().Next(8, 16);
         _rooms = RoomGenerator.Generate(dungeonSize);
         ArraySize = dungeonSize / 2;
     }

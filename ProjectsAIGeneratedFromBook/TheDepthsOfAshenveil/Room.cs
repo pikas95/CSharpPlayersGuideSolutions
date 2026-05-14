@@ -8,14 +8,18 @@
         Name = name;
         Description = description;
     }
+
+    public virtual ConsoleColor DisplayColor() => ConsoleColor.Gray;
 }
 internal class EnemyRoom : Room
 {
     public Enemy Enemy { get; private set; }
+
     public EnemyRoom(Enemy enemy) : base ($"{enemy.Name} cave", $"Filthy {enemy.Name} cave")
     {
         Enemy = enemy;
     }
+    public override ConsoleColor DisplayColor() => Enemy.Health > 0 ? ConsoleColor.Red : ConsoleColor.Gray;
     public void MarkEnemyDead() => Description += " (Dead)";
 }
 internal class WeaponRoom : Room
@@ -25,6 +29,7 @@ internal class WeaponRoom : Room
     {
         Weapon = weapon;
     }
+    public override ConsoleColor DisplayColor() => Weapon != null ? ConsoleColor.Green : ConsoleColor.Gray;
     public Weapon TakeWeapon()
     {
         Weapon weapon = Weapon!;
