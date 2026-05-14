@@ -1,6 +1,6 @@
 ﻿internal class Player
 {
-    public string Name { get; } = "Unknown";
+    public string Name { get; }
     public int Health { get; private set; } = 20;
     public int Col { get; private set; } = 0;
     public int Row { get; private set; } = 0;

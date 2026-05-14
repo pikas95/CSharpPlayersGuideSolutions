@@ -10,14 +10,14 @@
         
         while (_player.Health > 0) 
         {
-            Room currentRoom = _map.GetRoom(_player.Row, _player.Col);
+            Room currentRoom = _map.GetRoom(_player.Col, _player.Row);
 
-            if (currentRoom.Enemy?.Health > 0)
+            if (currentRoom is EnemyRoom room && room.Enemy.Health > 0)
             {
-                if (!FightEnemy(currentRoom))
+                if (!FightEnemy(room))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"You died from {currentRoom.Enemy.Name}...");
+                    Console.WriteLine($"You died from {room.Enemy.Name}...");
                     Console.ForegroundColor = ConsoleColor.White;
                     break;
                 }
@@ -69,9 +69,9 @@
 
     private static void DisplayCurrentRoom(Room room)
     {
-        if (room.Enemy?.Health > 0)
+        if (room is EnemyRoom enemyRoom && enemyRoom.Enemy.Health > 0)
             Console.ForegroundColor = ConsoleColor.Red;
-        else if (room.Weapon != null)
+        else if (room is WeaponRoom weaponRoom && weaponRoom.Weapon != null)
             Console.ForegroundColor = ConsoleColor.Green;
         else 
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -121,7 +121,7 @@
                 Console.WriteLine($"[6] Remove Weapon From Inventory");
             }
 
-            if (currentRoom.Weapon != null)
+            if (currentRoom is WeaponRoom room && room.Weapon != null)
                 Console.WriteLine($"[7] Collect Item");
 
             if (_player.Row == 0 && _player.Col == 0)
@@ -140,19 +140,19 @@
                 switch (input)
                 {
                     case 1:
-                        if (!MovePlayer(0, -1))
+                        if (!MovePlayer(-1, 0))
                             continue;
                         break;
                     case 2:
-                        if (!MovePlayer(1, 0))
-                            continue;
-                        break;
-                    case 3:
                         if (!MovePlayer(0, 1))
                             continue;
                         break;
+                    case 3:
+                        if (!MovePlayer(1, 0))
+                            continue;
+                        break;
                     case 4:
-                        if (!MovePlayer(-1, 0))
+                        if (!MovePlayer(0, -1))
                             continue;
                         break;
                     case 5:
@@ -162,7 +162,9 @@
                         _player.RemoveFromInventory(AskWeapon("Which weapon you wish to remove from inventory? "));
                         break;
                     case 7:
-                        _player.AddToInventory(currentRoom.TakeWeapon());
+                        // this case will only compute if input = 7 validates through IsValidAction() 
+                        // so casting will always compile
+                        _player.AddToInventory(((WeaponRoom)currentRoom).TakeWeapon());
                         break;
                     case 0:
                         return true;
@@ -203,12 +205,12 @@
                     return true;
                 else if (_player.Inventory.Weapons[0] != null)
                 {
-                    if (currentRoom.Weapon != null && input <= 7)
+                    if (currentRoom is WeaponRoom room && room.Weapon != null && input <= 7)
                         return true;
                     else if (input <= 6)
                         return true;
                 }
-                else if (currentRoom.Weapon != null && input == 7)
+                else if (currentRoom is WeaponRoom room && room.Weapon != null && input == 7)
                     return true;
 
                 return false;
@@ -219,8 +221,8 @@
         {
             if (_player.Row + row < 0 || 
                 _player.Col + col < 0 ||
-                _player.Row + row >= _map.Size || 
-                _player.Col + col >= _map.Size)
+                _player.Row + row >= _map.ArraySize || 
+                _player.Col + col >= _map.ArraySize)
             {
                 Console.WriteLine("You bumped into a wall..");
                 return false;
@@ -246,12 +248,12 @@
         }
     }
 
-    private bool FightEnemy(Room room)
+    private bool FightEnemy(EnemyRoom room)
     {
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"{_player.Name}, you have entered {room.Name}.");
-        Console.WriteLine($"{room.Enemy!.Name} has noticed you and began running towards you!");
+        Console.WriteLine($"{room.Enemy.Name} has noticed you and began running towards you!");
         Console.ForegroundColor = ConsoleColor.White;
 
         Console.Write("Press enter to begin battle");

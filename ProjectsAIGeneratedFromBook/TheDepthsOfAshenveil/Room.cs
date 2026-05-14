@@ -1,28 +1,30 @@
 ﻿internal class Room
 {
     public string Name { get; }
-    public string Description { get; private set; }
-    public Enemy? Enemy { get; private set; } = null;
-    public Weapon? Weapon { get; private set; } = null;
+    public string Description { get; protected set; }
 
-    public Room(Enemy enemy)
-    {
-        Enemy = enemy;
-        Name = $"{enemy.Name} cave";
-        Description = $"Filthy {Name}";
-    }
-    public Room(Weapon weapon)
-    {
-        Weapon = weapon;
-        Name = $"{weapon.Name} tomb";
-        Description = $"Forgotten tomb of {weapon.Name} treasure";
-    }
     public Room(string name, string description)
     {
         Name = name;
         Description = description;
     }
-
+}
+internal class EnemyRoom : Room
+{
+    public Enemy Enemy { get; private set; }
+    public EnemyRoom(Enemy enemy) : base ($"{enemy.Name} cave", $"Filthy {enemy.Name} cave")
+    {
+        Enemy = enemy;
+    }
+    public void MarkEnemyDead() => Description += " (Dead)";
+}
+internal class WeaponRoom : Room
+{
+    public Weapon? Weapon { get; private set; }
+    public WeaponRoom(Weapon weapon) : base ($"{weapon.Name} tomb", $"Forgotten tomb of {weapon.Name} treasure")
+    {
+        Weapon = weapon;
+    }
     public Weapon TakeWeapon()
     {
         Weapon weapon = Weapon!;
@@ -30,6 +32,8 @@
         Description += " (Claimed)";
         return weapon;
     }
-
-    public void MarkEnemyDead() => Description += " (Dead)";
+}
+internal class EmptyRoom : Room
+{
+    public EmptyRoom(string name, string description) : base(name, description) { }
 }

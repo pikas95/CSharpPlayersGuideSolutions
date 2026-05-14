@@ -24,9 +24,9 @@
         {
             return random.Next(0, 3) switch
             {
-                0 => new Room(new Enemy("Troll", 20, 4, 8)),
-                1 => new Room(new Enemy("Zombie", 12, 3, 6)),
-                _ => new Room(new Enemy("Skeleton", 8, 1, 4))
+                0 => new EnemyRoom(new Enemy("Troll", 20, 4, 8)),
+                1 => new EnemyRoom(new Enemy("Zombie", 12, 3, 6)),
+                _ => new EnemyRoom(new Enemy("Skeleton", 8, 1, 4))
             };
         }
 
@@ -34,13 +34,13 @@
         {
             return random.Next(0, 3) switch
             {
-                0 => new Room(new Weapon("Legendary Katana", 6, 12)),
-                1 => new Room(new Weapon("Epic Bloody Dagger", 5, 8)),
-                _ => new Room(new Weapon("Steel Sword", 3, 7))
+                0 => new WeaponRoom(new Weapon("Legendary Katana", 6, 12)),
+                1 => new WeaponRoom(new Weapon("Epic Bloody Dagger", 5, 8)),
+                _ => new WeaponRoom(new Weapon("Steel Sword", 3, 7))
             };
         }
 
-        Room SetEmpty() => new Room("Empty room", "Creepy empty room");
+        Room SetEmpty() => new EmptyRoom("Empty room", "Creepy empty room");
 
         return rooms;
     }
