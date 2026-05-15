@@ -1,16 +1,12 @@
-﻿internal class Player
+﻿internal class Player : Combatant
 {
-    public string Name { get; }
-    public int Health { get; private set; } = 20;
     public int Col { get; private set; } = 0;
     public int Row { get; private set; } = 0;
     public Inventory Inventory { get; private set; } 
     public Weapon EquippedWeapon { get; private set; }
-    private static readonly Random _random = new Random();
 
-    public Player(string name, Weapon weapon)
+    public Player(string name, Weapon weapon) : base (name, 20, 1, 4) // Health = 20; DamageMin = 1, DamageMax = 4 (base player damage)
     {
-        Name = name;
         EquippedWeapon = weapon;
         Inventory = new Inventory(5);
     }
@@ -39,22 +35,21 @@
         Row += row;
     }
 
-    public int StabAttack()
+    public override int Attack()
     {
-        int damageAddon = (EquippedWeapon.DamageMax - EquippedWeapon.DamageMin) / 3;
+        int damageAddon = ((DamageMax + EquippedWeapon.DamageMax) - (DamageMin + EquippedWeapon.DamageMin)) / 3;
 
-        return _random.Next(EquippedWeapon.DamageMin + damageAddon, EquippedWeapon.DamageMax - damageAddon);
+        return Random.Next(DamageMin + EquippedWeapon.DamageMin + damageAddon, 
+                            DamageMax + EquippedWeapon.DamageMax - damageAddon);
     }
 
     public int PowerAttack()
     {
         int damageAddon = 0;
 
-        if (EquippedWeapon.DamageMax < 20)
-            damageAddon = (EquippedWeapon.DamageMax - EquippedWeapon.DamageMin) / 3;
+        if (DamageMax + EquippedWeapon.DamageMax < 20)
+            damageAddon = ((DamageMax + EquippedWeapon.DamageMax) - (DamageMin + EquippedWeapon.DamageMin)) / 3;
 
-        return _random.Next(0, EquippedWeapon.DamageMax + damageAddon);
+        return Random.Next(0, DamageMax + EquippedWeapon.DamageMax + damageAddon);
     }
-
-    public void ReceiveDamage(int damage) => Health -= damage;
 }

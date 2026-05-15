@@ -13,15 +13,8 @@
             Room currentRoom = _map.GetRoom(_player.Col, _player.Row);
 
             if (currentRoom is EnemyRoom room && room.Enemy.Health > 0)
-            {
-                if (!FightEnemy(room))
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"You died from {room.Enemy.Name}...");
-                    Console.ForegroundColor = ConsoleColor.White;
+                if (!EnemyEncounter(room))
                     break;
-                }
-            }
 
             // displays player health and weapon
             DisplayPlayerStats();
@@ -34,10 +27,7 @@
 
             if (PlayerTurn(currentRoom))
             {
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Congratulations {_player.Name}, you came out the dungeon alive!");
-                Console.ForegroundColor = ConsoleColor.White;
+                DisplayExitMessage();
                 break;
             }
 
@@ -69,7 +59,7 @@
 
     private static void DisplayCurrentRoom(Room room)
     {
-        Console.ForegroundColor = room.DisplayColor();
+        Console.ForegroundColor = room.DisplayColor;
 
         Console.WriteLine($"Your surroundings: {room.Description}");
         Console.WriteLine();
@@ -82,6 +72,8 @@
             Console.WriteLine("Inventory is empty");
         else
         {
+            if (inventory.Full())
+                Console.Write("(Full) ");
             Console.WriteLine("Your inventory: ");
             for (int i = 0; i < inventory.Weapons.Length; i++)
                 if (inventory.Weapons[i] != null)
@@ -95,9 +87,7 @@
     {
         DisplayActions();
 
-        if (MakeTurn())
-            return true;
-        return false;
+        return MakeTurn();
         
         void DisplayActions()
         {
@@ -178,7 +168,7 @@
 
             while (!IsValidAction(input))
             {
-                Console.Write("There's no such option. Again: ");
+                Console.Write(GetInvalidMessage(input));
                 input = Convert.ToInt32(Console.ReadLine()); // TODO: implement TryParse
             }
 
@@ -200,7 +190,7 @@
                     return true;
                 else if (_player.Inventory.Weapons[0] != null)
                 {
-                    if (currentRoom is WeaponRoom room && room.Weapon != null && input <= 7)
+                    if (currentRoom is WeaponRoom room && room.Weapon != null && !_player.Inventory.Full() && input <= 7)
                         return true;
                     else if (input <= 6)
                         return true;
@@ -210,6 +200,13 @@
 
                 return false;
             }
+        }
+
+        string GetInvalidMessage(int input)
+        {
+            if (input == 7 && currentRoom is WeaponRoom room && room.Weapon != null && _player.Inventory.Full())
+                return "Inventory is full. Again: ";
+            return "There's no such option. Again: ";
         }
 
         bool MovePlayer(int col, int row)
@@ -243,25 +240,42 @@
         }
     }
 
-    private bool FightEnemy(EnemyRoom room)
+    private bool EnemyEncounter(EnemyRoom room)
+    {
+        DisplayEnemyEncounterMessage(room);
+
+        if (!FightEnemy(room.Enemy))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"You died from {room.Enemy.Name}...");
+            Console.ForegroundColor = ConsoleColor.White;
+            return false;
+        }
+
+        room.MarkEnemyDead();
+        return true;
+    }
+
+    private void DisplayEnemyEncounterMessage(EnemyRoom room)
     {
         Console.Clear();
-        Console.ForegroundColor = room.DisplayColor();
+        Console.ForegroundColor = room.DisplayColor;
         Console.WriteLine($"{_player.Name}, you have entered {room.Name}.");
         Console.WriteLine($"{room.Enemy.Name} has noticed you and began running towards you!");
         Console.ForegroundColor = ConsoleColor.White;
 
-        Console.Write("Press enter to begin battle");
-        Console.ReadLine();
+        WaitForEnter();
+    }
 
-        while (_player.Health > 0 && room.Enemy.Health > 0)
+    private bool FightEnemy(ICombatant enemy)
+    {
+        while (_player.Health > 0 && enemy.Health > 0)
         {
             Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine($"Your health: {_player.Health} | {room.Enemy.Name} health: {room.Enemy.Health}");
-            Console.ForegroundColor = ConsoleColor.White;
 
-            Console.WriteLine("[1] Stab Attack " +
+            DisplayHealthStats();
+
+            Console.WriteLine("[1] Attack " +
                               "[2] Power Attack");
 
             int input = Convert.ToInt32(Console.ReadLine()); // TODO: implement TryParse
@@ -274,15 +288,15 @@
 
             int playerDamage = input switch
             {
-                1 => _player.StabAttack(),
+                1 => _player.Attack(),
                 2 => _player.PowerAttack(),
-                _ => _player.StabAttack(),
+                _ => _player.Attack(),
             };
 
-            room.Enemy.ReceiveDamage(playerDamage);
+            enemy.ReceiveDamage(playerDamage);
             
-            if (room.Enemy.Health > 0)
-                _player.ReceiveDamage(room.Enemy.Attack());
+            if (enemy.Health > 0)
+                _player.ReceiveDamage(enemy.Attack());
         }
 
         Console.Clear();
@@ -291,14 +305,33 @@
             return false;
 
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"You have killed {room.Enemy.Name}!");
+        Console.WriteLine($"You have killed {enemy.Name}!");
         Console.ForegroundColor = ConsoleColor.White;
 
-        room.MarkEnemyDead();
-        Console.Write("Press enter to continue");
-        Console.ReadLine();
+        WaitForEnter();
         Console.Clear();
 
         return true;
+
+        void DisplayHealthStats()
+        {
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine($"Your health: {_player.Health} | {enemy.Name} health: {enemy.Health}");
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+    }
+
+    private void DisplayExitMessage()
+    {
+        Console.Clear();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Congratulations {_player.Name}, you came out the dungeon alive!");
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+
+    private void WaitForEnter()
+    {
+        Console.Write("Press enter to continue");
+        Console.ReadLine();
     }
 }

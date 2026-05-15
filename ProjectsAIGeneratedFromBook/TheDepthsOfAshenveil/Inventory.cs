@@ -49,4 +49,6 @@
             }
         }
     }
+
+    public bool Full() => Weapons[^1] != null; // SortInventory() runs anytime a weapon is removed from Weapons[]
 }
