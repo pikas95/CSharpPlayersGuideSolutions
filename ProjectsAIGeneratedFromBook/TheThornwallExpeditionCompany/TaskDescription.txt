@@ -1,0 +1,89 @@
+⚔️ Project 1 — The Thornwall Expedition Company
+Covers: inheritance, polymorphism, interfaces, default interface methods, 
+enums, properties, arrays, tuples, static, null references, 
+switch expressions, methods
+Narrative: The Thornwall Expedition Company has run contracts across the 
+eastern reaches for thirty years on parchment and gut instinct. That system 
+has finally collapsed. You are rebuilding it in code — contractor records, 
+expedition rosters, event resolution. Every contractor type is different. 
+Every expedition is a different problem. The system needs to reflect that 
+without knowing in advance what it's dealing with.
+
+Objectives
+Objective 1 — The Contractor
+Design a contractor base type. All contractors share a name, a health maximum, 
+a current health value, and a daily rate. Current health should be readable 
+from anywhere but only modifiable within the class hierarchy. How a contractor 
+is displayed should have a sensible default — enough to identify them at a 
+glance — but individual types should be able to extend that display without 
+replacing it entirely. How a contractor contributes when an expedition 
+encounters a situation depends entirely on their type; no shared default makes 
+sense here.
+
+
+Objective 2 — The Roster
+Create at least four meaningfully different contractor types. Their differences 
+should show up in what they do, not just what they're called. Consider:
+
+A frontline fighter — high health, excels in direct confrontation
+A field medic — lower health, focused on keeping the roster alive
+A scout — versatile, capable in multiple roles
+An arcanist — powerful in the right situation, fragile in others
+
+At least one type should be sealed. At least one type should extend the base 
+display using the base type's own display logic rather than rewriting it from 
+scratch. All types must chain their constructors to the base. What numeric type 
+you use for health and rate, and why, is your decision — justify it in a comment.
+
+
+Objective 3 — The Roles
+Some contractors can engage in combat. Some can restore health to injured members. 
+Some have a specialist skill — a single capability that only they can bring to a 
+non-combat problem (reading an inscription, defusing a trap, navigating unstable 
+terrain). Model these as roles. A contractor can fulfill more than one. The roles 
+should be modeled so that the expedition's event resolution never needs to ask 
+what type a contractor is — only what roles they can fill. At least one role 
+should provide a working default behavior that most implementors are fine with, 
+but which one type overrides with something more powerful.
+
+
+Objective 4 — The Expedition
+An expedition has a name, a destination, and a roster capped at 5 contractors. 
+It must be possible to hire and dismiss contractors from the roster. Before 
+departing, the expedition should be able to report which roles it has covered 
+and which it's missing — an expedition heading into ruins without someone who 
+can handle specialist problems should know that before it leaves. How you signal 
+a coverage gap is your decision.
+
+
+Objective 5 — The Events
+Build at least four event types that an expedition can encounter — one that 
+demands combat capability, one that demands healing, one that demands specialist 
+skill, and one that hits the whole roster regardless of composition. When an 
+event is resolved, the outcome should be driven by what the roster can do, not 
+by hardcoded checks for specific contractor types. Resolution should return 
+enough information to report what happened and what it cost. Starting values 
+around 80–100 HP for contractors and 15–25 damage per event give you a workable 
+baseline — tune until the outcomes feel like they have stakes.
+
+
+Objective 6 — The Ledger
+Build a menu-driven loop. The user should be able to hire contractors from an 
+available pool, form an expedition, run it through a sequence of events, and 
+see a final report. All input must be validated. The program must never crash.
+
+🔴 Edge Case — Objective 7: The Role Query
+After finishing the event resolution system, write a comment reflecting on the 
+roster query: did walking a Contractor[] and checking roles at query time produce
+cleaner code than you expected, or did it create friction? What would you have 
+given up if you'd stored contractors pre-sorted by role instead? Was there a 
+moment where the base-type array forced you to write something you wouldn't 
+have needed otherwise?
+
+
+🔴 Edge Case — Objective 8: The Name Collision
+Design your roles so that at least two of them have a method that could 
+reasonably share a name — something like checking readiness, or engaging with 
+a situation. Implement a contractor type that fulfills both roles and see what 
+the compiler tells you. Write a comment on what you discovered, what it forced 
+you to do, and whether the result was cleaner or messier than what you had before.
