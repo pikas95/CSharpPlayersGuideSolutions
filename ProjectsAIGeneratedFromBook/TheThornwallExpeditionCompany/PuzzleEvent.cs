@@ -11,7 +11,7 @@
     public override void StartEvent(Contractor[] contractors)
     {
         foreach (Contractor contractor in contractors)
-            if (contractor.Roles.Contains(RoleType.Researcher) && contractor.Health > 0 && LeftTryCount > 0)
+            if (contractor?.Roles.Contains(RoleType.Researcher) == true && contractor.Health > 0 && LeftTryCount > 0)
             {
                 TrySolving();
 

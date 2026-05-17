@@ -1,23 +1,50 @@
 ﻿internal class GameProgram
 {
-    private Contractor[] _contractorPool;
+    private GameRenderer _renderer = new GameRenderer();
+    private InputHandler _input = new InputHandler();
+    private Contractor[] _contractorStore;
     private Expedition _expedition;
 
     public GameProgram()
     {
-        _contractorPool = GenerateContractorPool();
+        _contractorStore = GenerateContractorStore();
         _expedition = GenerateExpedition();
     }
 
     public void Run()
     {
-        HiringContractors(); // make more intuitive and clean
+        ContractorStore(); // make more intuitive and clean
 
+        _renderer.DisplayOwnedContractors(_expedition.Contractors);
+        _input.WaitForEnter("Press enter to begin expedition");
+        Console.Clear();
         // before starting the expedition make rolereport
         // and waitforenter before start
 
 
+        for (int i = 0; i < _expedition.Events.Length; i++ )
+        {
+            Console.WriteLine($"Expedition: {_expedition.Name} | Destination: {_expedition.Destination}");
+            _renderer.DisplayOwnedContractors(_expedition.Contractors);
 
+            Console.WriteLine(_expedition.Events[i]);
+            Console.WriteLine();
+
+            _input.WaitForEnter("Press enter to simulate event");
+
+            while (!_expedition.Events[i].EventCompleted())
+            {
+                _expedition.Events[i].StartEvent(_expedition.Contractors);
+
+                Console.WriteLine("Status:");
+                _renderer.DisplayOwnedContractors(_expedition.Contractors);
+
+                _input.WaitForEnter("Press enter to attempt event again");
+            }
+            
+
+            Console.Clear();
+        }
         // display expedition Event: assault - begin combat,
         // trap - force to solve(if no trapper receive damage immediately),
         // puzzle/treasure ask to do it or go to other event
@@ -35,60 +62,54 @@
         // create a class to store contractors, GP
     }
 
-    private void HiringContractors()
+    private void ContractorStore()
     {
         while (true)
         {
-            Console.WriteLine(_expedition.RolesReport());
-            Console.WriteLine();
+            _renderer.DisplayOwnedContractorRoles(_expedition);
+            _renderer.DisplayHirableContractors(_contractorStore);
+            int input = _input.AskContractorToHire(_contractorStore);
 
-            for (int i = 0; i < _contractorPool.Length; i++)
-                if (_contractorPool[i] != null)
-                    Console.WriteLine($"[{i + 1}] {_contractorPool[i]}");
-
-            Console.Write("Which contractor you wish to hire ([0] to exit)? ");
-
-            int input = Convert.ToInt32(Console.ReadLine());
-
-            if (InputValid(input))
+            if (input == 0)
             {
-                if (input == 0)
-                    break;
-                else
-                {
-                    _expedition.HireContractor(_contractorPool[input - 1]);
-                    _contractorPool[input - 1] = null!;
-                }
+                Console.Clear();
+                break;
             }
-            
-            Console.Clear();
-        }
+            else
+            {
+                // contractors are displayed index + 1 in _renderer
+                _expedition.HireContractor(_contractorStore[input - 1]);
+                _contractorStore[input - 1] = null!;
+            }
 
-        bool InputValid(int input)
-        {
-            if (input >= 0 && input <= _contractorPool.Length)
-                return true;
-            return false;
-        }
-        
+            SortContractorStore();
+
+            Console.Clear();
+        }        
     }
 
-    /*private Contractor[] SortContractorPool()
+    private void SortContractorStore()
     {
-        for (int i =)
-    }*/
+        for (int i = 0; i < _contractorStore.Length - 1; i++)
+            for (int j = i + 1; j < _contractorStore.Length; j++)
+                if (_contractorStore[i] == null && _contractorStore[j] != null)
+                {
+                    _contractorStore[i] = _contractorStore[j];
+                    _contractorStore[j] = null!;
+                }
+    }
 
-    private Contractor[] GenerateContractorPool()
+    private Contractor[] GenerateContractorStore()
     {
         return [new Fighter(), new Fighter(), new Medic(), new Scout()];
     }
 
     private Expedition GenerateExpedition()
     {
-        return new Expedition("Testing Expedition", "Working Program", GenerateExpeditions());
+        return new Expedition("Testing Expedition", "Working Program", GenerateExpeditionEvents());
     }
 
-    private ExpeditionEvent[] GenerateExpeditions()
+    private ExpeditionEvent[] GenerateExpeditionEvents()
     {
         return [new AssaultEvent(GenerateEnemies()), 
                 new AssaultEvent(GenerateEnemies()), 

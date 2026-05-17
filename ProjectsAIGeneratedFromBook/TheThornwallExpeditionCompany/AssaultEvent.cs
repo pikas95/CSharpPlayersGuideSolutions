@@ -37,10 +37,28 @@
         return fighters;
     }
 
+    /*private Contractor[] GetContractorsWiithoutNull(Contractor[] contractorsWithNull)
+    {
+        int contractorCount = 0;
+
+        foreach (Contractor contractor in contractorsWithNull)
+            if (contractor != null)
+                contractorCount++;
+
+        Contractor[] contractors = new Contractor[contractorCount];
+        fighterCount = 0;
+
+        foreach (Contractor contractor in contractors)
+            if (contractor is Fighter fighter)
+                fighters[fighterCount++] = fighter;
+
+        return fighters;
+    }*/
+
     private void OneSideAttack(Combatant[] attacker, Combatant[] targets)
     {
         for (int i = 0; i < attacker.Length; i++)
-            targets[Random.Next(0, targets.Length)].ReceiveDamage(attacker[i].Attack());
+            targets[Random.Next(0, targets.Length)]?.ReceiveDamage(attacker[i].Attack());
     }
 
     private bool AnyCombatantAlive(Combatant[] combatants)

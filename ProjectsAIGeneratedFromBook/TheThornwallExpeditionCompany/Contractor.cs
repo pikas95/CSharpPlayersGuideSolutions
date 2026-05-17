@@ -24,7 +24,7 @@
 
         for (int i = 0; i < Roles.Length; i++)
         {
-            list = Roles[i].ToString();
+            list += Roles[i].ToString();
             if (i + 1 != Roles.Length)
                 list += ", ";
         }

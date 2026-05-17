@@ -13,7 +13,7 @@
     public override void StartEvent(Contractor[] contractors)
     {
         foreach (Contractor contractor in contractors)
-            if (contractor.Roles.Contains(RoleType.Trapper) && contractor.Health > 0 && LeftTryCount > 0)
+            if (contractor?.Roles.Contains(RoleType.Trapper) == true && contractor.Health > 0 && LeftTryCount > 0)
             {
                 TryDisarming();
 

@@ -4,7 +4,7 @@
     public string Destination { get; protected set; }
     public Contractor[] Contractors { get; protected set; } = new Contractor[5];
     public ExpeditionEvent[] Events { get; protected set; }
-    protected int Count { get; set; }
+    protected int ContractorCount { get; set; }
     
     public Expedition(string name, string destination, ExpeditionEvent[] events)
     {
@@ -15,9 +15,9 @@
 
     public bool HireContractor(Contractor contractor)
     {
-        if (Count < Contractors.Length)
+        if (ContractorCount < Contractors.Length)
         {
-            Contractors[Count++] = contractor;
+            Contractors[ContractorCount++] = contractor;
             return true;
         }
         return false;
@@ -28,15 +28,15 @@
         Contractor dismiss = Contractors[index];
         Contractors[index] = null!;
         SortContractors();
-        Count--;
+        ContractorCount--;
         return dismiss;
     }
 
     protected void SortContractors()
     {
-        for (int i = 0; i < Count - 1; i++)
+        for (int i = 0; i < ContractorCount - 1; i++)
         {
-            for (int j = i + 1; j < Count; j++)
+            for (int j = i + 1; j < ContractorCount; j++)
             {
                 if (Contractors[i] == null)
                 {
@@ -56,6 +56,9 @@
             if (contractor != null)
                 report += $"{contractor.Name}: {contractor.RoleList()}\n";
 
+        if (report == "Covered Roles:\n")
+            report = "No contractor hired";
+
         report += "\n";
 
         // adds not covered roles into report
@@ -70,9 +73,9 @@
         RoleType[] allRoles = Enum.GetValues<RoleType>();
         bool[] found = new bool[allRoles.Length];
 
-        for (int i = 0; i < allRoles.Length; i++)
+        for (int i = 1; i < allRoles.Length; i++)
         {
-            for (int j = 0; j < Contractors.Length; j++)
+            for (int j = 1; j < Contractors.Length; j++)
             {
                 if (Contractors[j] != null && Contractors[j].Roles.Contains(allRoles[i]))
                 {
