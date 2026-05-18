@@ -1,10 +1,8 @@
 ﻿internal class Enemy : Combatant
 {
-    public string Name { get; }
-
     public Enemy(string name, int maxHealth, int minDamage, int maxDamage)
-        : base(maxHealth, minDamage, maxDamage)
-    { Name = name; }
+        : base(name, maxHealth, minDamage, maxDamage)
+    { }
 
     public override string ToString()
     {

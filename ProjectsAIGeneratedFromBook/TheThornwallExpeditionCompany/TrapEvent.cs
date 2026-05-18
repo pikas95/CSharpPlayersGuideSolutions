@@ -1,34 +1,33 @@
-﻿internal class TrapEvent : ExpeditionEvent
+﻿internal class TrapEvent : RoleTypeEvent
 {
-    protected bool IsTrapActive { get; set; } = true;
-    public int MaxDisarmTries { get; } = 3;
-    public int LeftTryCount { get; protected set; }
     protected int TrapDamage { get; }
-    public TrapEvent(int trapDamage) : base("Trap", EventType.Trap, 25) 
-    { 
+    public TrapEvent(int trapDamage) : base("Trap", EventType.Trap, RoleType.Trapper, 35)
+    {
         TrapDamage = trapDamage;
-        LeftTryCount = MaxDisarmTries;
     }
 
-    public override void StartEvent(Contractor[] contractors)
+    public override bool Try(Player player)
     {
-        foreach (Contractor contractor in contractors)
-            if (contractor?.Roles.Contains(RoleType.Trapper) == true && contractor.Health > 0 && LeftTryCount > 0)
+        foreach (Contractor contractor in player.Contractors)
+            if (contractor?.Roles.Contains(RoleRequired) == true && contractor.Health > 0 && LeftTryCount > 0)
             {
-                TryDisarming();
-
-                if (!IsTrapActive)
-                    return;
+                TrySolving();
+                break;
             }
+
+        if (LeftTryCount == 0 && !IsSolved)
+            DealTrapDamage(player.Contractors);
+
+        if (LeftTryCount == 3)
+            LeftTryCount = 0;
+
+        return IsSolved;
     }
 
-    private void TryDisarming()
+    public void DealTrapDamage(Contractor[] contractors)
     {
-        LeftTryCount--;
-
-        if (Random.Next(0, 6) > 3)
-            IsTrapActive = false;
+        for (int i = 0; i < contractors.Length; i++)
+            if (contractors[i]?.Health > 0)
+                contractors[i].ReceiveDamage(TrapDamage);
     }
-
-    public override bool EventCompleted() => !IsTrapActive;
 }

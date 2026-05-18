@@ -1,13 +1,11 @@
 ﻿internal class Contractor : Combatant
 {
     public RoleType[] Roles { get; protected set; } = new RoleType[1]; // default RoleType.Commoner
-    public string Name { get; }
     public int DailyRate { get; }
 
     public Contractor(string name, int maxHealth, int dailyRate, int minDamage, int maxDamage)
-        : base(maxHealth, minDamage, maxDamage)
+        : base(name, maxHealth, minDamage, maxDamage)
     {
-        Name = name;
         DailyRate = dailyRate;
     }
 

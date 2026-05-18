@@ -12,7 +12,7 @@
     {
         MinHeal = DeclareMinHeal();
         MaxHeal = DeclareMaxHeal();
-        Roles = [RoleType.Healer, RoleType.Fighter];
+        Roles = [RoleType.Healer];
     }
 
     public Medic(string name, int maxHealth, int dailyRate, RoleType[] roles)
