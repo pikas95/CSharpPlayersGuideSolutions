@@ -1,6 +1,6 @@
 ﻿internal class RoleTypeEvent : ExpeditionEvent
 {
-    protected RoleType RoleRequired { get; }
+    public RoleType RoleRequired { get; }
     protected bool IsSolved { get; set; } = false;
     public int MaxTries { get; } = 3;
     public int LeftTryCount { get; protected set; }
@@ -11,17 +11,10 @@
         LeftTryCount = MaxTries;
     }
 
-    public virtual bool Try(Player player)
+    public virtual bool Try(Contractor contractor)
     {
-        foreach (Contractor contractor in player.Contractors)
-            if (contractor?.Roles.Contains(RoleRequired) == true && contractor.Health > 0 && LeftTryCount > 0)
-            {
-                TrySolving();
-                break;
-            }
-
-        if (LeftTryCount == 3)
-            LeftTryCount = 0;
+        if (contractor?.Roles.Contains(RoleRequired) == true && contractor.Health > 0 && LeftTryCount > 0)
+            TrySolving();
 
         return IsSolved;
     }

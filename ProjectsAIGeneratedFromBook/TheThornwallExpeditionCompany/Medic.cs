@@ -1,4 +1,4 @@
-﻿internal class Medic : Contractor, IMedic
+﻿internal class Medic : Contractor, IHealer
 {
     protected const int _defaultHealth = 50;
     protected const int _defaultDailyRate = 35;
@@ -63,7 +63,7 @@
             int healing = Heal();
 
             for (int i = 0; i < contractors.Length; i++)
-                contractors[i].ApplyHealing(healing / 2);
+                contractors[i]?.ApplyHealing(healing / 2);
 
             HealCooldown = 3;
 
@@ -83,7 +83,17 @@
         return false;
     }
 
-    public void DecrementCooldown() => HealCooldown--;
+    public void DecrementCooldown()
+    {
+        if (HealCooldown > 0)
+            HealCooldown--;
+    }
 
-    public override string ToString() => $"{base.ToString()} | Heal Rate: {MinHeal}-{MaxHeal}";
+    public override void Reset()
+    {
+        base.Reset();
+        HealCooldown = 0;
+    }
+
+    public override string ToString() => $"{base.ToString()} | Heal Rate: {MinHeal}-{MaxHeal} | Heal Cooldown: {(HealCooldown > 0 ? HealCooldown + " Turns" : "None")}";
 }

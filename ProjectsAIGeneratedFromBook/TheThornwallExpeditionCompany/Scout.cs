@@ -1,4 +1,4 @@
-﻿internal class Scout : Contractor, IMedic
+﻿internal class Scout : Contractor, IHealer
 {
     protected const int _defaultHealth = 85;
     protected const int _defaultDailyRate = 50;
@@ -63,7 +63,7 @@
             int healing = Heal();
 
             for (int i = 0; i < contractors.Length; i++)
-                contractors[i].ApplyHealing(healing / 2);
+                contractors[i]?.ApplyHealing(healing / 2);
 
             HealCooldown = 3;
 
@@ -83,7 +83,17 @@
         return false;
     }
 
-    public void DecrementCooldown() => HealCooldown--;
+    public void DecrementCooldown()
+    {
+        if (HealCooldown > 0)
+            HealCooldown--;
+    }
 
-    public override string ToString() => $"{base.ToString()} | Heal Rate: {MinHeal}-{MaxHeal}";
+    public override void Reset()
+    {
+        base.Reset();
+        HealCooldown = 0;
+    }
+
+    public override string ToString() => $"{base.ToString()} | Heal Rate: {MinHeal}-{MaxHeal} | Heal Cooldown: {(HealCooldown > 0 ? HealCooldown + " Turns" : "None")}";
 }

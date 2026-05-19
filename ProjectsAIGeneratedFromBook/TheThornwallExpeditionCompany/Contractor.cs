@@ -9,7 +9,13 @@
         DailyRate = dailyRate;
     }
 
-    public virtual void ApplyHealing(int healing) => Health += healing;
+    public virtual void ApplyHealing(int healing)
+    {
+        if (Health + healing > MaxHealth)
+            Health = MaxHealth;
+        else
+            Health += healing;
+    }
 
     public override string ToString()
     {

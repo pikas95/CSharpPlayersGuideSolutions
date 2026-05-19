@@ -41,6 +41,7 @@
             return true;
 
         Console.WriteLine("You didn't say \"yes\" so I guess it's a no..");
+        Console.WriteLine();
         return false;
     }
 
@@ -53,6 +54,21 @@
         {
             NoSuchOption();
             target = (Enemy)GetCombatant(enemies)!;
+        }
+
+        Console.Clear();
+        return target;
+    }
+
+    public Contractor AskForTargetOfHealer(Contractor[] contractors)
+    {
+        Console.Write("Which contractor you wish to heal? ");
+        Contractor target = (Contractor)GetCombatant(contractors)!; // - 1 because combatants are displayed index + 1; TODO: implement TryParse
+
+        while (target == null || target.Health == 0)
+        {
+            NoSuchOption();
+            target = (Contractor)GetCombatant(contractors)!;
         }
 
         Console.Clear();

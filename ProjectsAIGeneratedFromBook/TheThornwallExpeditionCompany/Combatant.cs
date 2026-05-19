@@ -23,4 +23,10 @@
         else
             Health -= damage;
     }
+
+    public virtual void Reset()
+    {
+        if (Health != 0)
+            Health = MaxHealth;
+    }
 }

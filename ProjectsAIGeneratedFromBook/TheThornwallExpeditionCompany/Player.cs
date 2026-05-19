@@ -4,6 +4,7 @@
     public Contractor[] Contractors { get; protected set; } = new Contractor[5];
     public int ContractorCount { get; protected set; }
     public int GP { get; protected set; }
+    public int DailyContractorsGPRate { get; protected set; }
 
     public Player(string name, int startingGP)
     {
@@ -12,9 +13,10 @@
     }
     public bool HireContractor(Contractor contractor)
     {
-        if (ContractorCount < Contractors.Length) 
+        if (ContractorCount < Contractors.Length && contractor.DailyRate + DailyContractorsGPRate < GP) 
         {
             Contractors[ContractorCount++] = contractor;
+            DailyContractorsGPRate += contractor.DailyRate;
             return true;
         }
         return false;
@@ -22,6 +24,7 @@
 
     public Contractor DismissContractor(int index) 
     {
+        DailyContractorsGPRate -= Contractors[index].DailyRate;
         Contractor dismiss = Contractors[index];
         Contractors[index] = null!;
         SortContractors();
@@ -42,6 +45,15 @@
                 }
             }
         }
+    }
+
+    public Contractor? GetRoleTypeContractor(RoleType roleType)
+    {
+        foreach (Contractor contractor in Contractors)
+            if (contractor?.Roles.Contains(roleType) == true && contractor.Health > 0)
+                return contractor;
+
+        return null;
     }
 
     public string RolesReport()
@@ -92,7 +104,38 @@
         return report == null ? "All roles are covered!" : "Missing roles:\n" + report;
     }
 
-    public void ReceiveEventReward(int rewardGP) => GP += rewardGP;
+    public void TryReceiveEventReward(ExpeditionEvent expeditionEvent)
+    {
+        if (expeditionEvent.EventCompleted())
+            GP += expeditionEvent.EventRewardGP;
+    }
+
+    public bool AllContractorsFullHP()
+    {
+        foreach (Contractor contractor in Contractors)
+            if (contractor?.Health < contractor?.MaxHealth)
+                return false;
+
+        return true;
+    }
+
+    public bool HaveHealers()
+    {
+        foreach (Contractor contractor in Contractors)
+            if (contractor is IHealer)
+                return true;
+
+        return false;
+    }
+
+    public bool AnyHealerCanPerformHealing()
+    {
+        foreach (Contractor contractor in Contractors)
+            if (contractor is IHealer healer && healer.HealCooldown == 0)
+                return true;
+
+        return false;
+    }
 
     public bool ContractorsAreWiped()
     {
@@ -101,5 +144,28 @@
                 return false;
 
         return true;
+    }
+
+    public void UpdateGPAfterExpedition()
+    {
+        for (int i = 0; i < Contractors.Length; i++)
+            if (Contractors[i]?.Health == 0)
+                DailyContractorsGPRate -= Contractors[i].DailyRate;
+
+        GP -= DailyContractorsGPRate;
+    }
+
+    public void UpdateContractorsAfterExpedition()
+    {
+        foreach (Contractor contractor in Contractors)
+            if (contractor?.Health > 0)
+                contractor.Reset();
+    }
+
+    public void UpdateAfterEvent()
+    {
+        foreach (Contractor contractor in Contractors)
+            if (contractor is IHealer healer)
+                healer.DecrementCooldown();
     }
 }

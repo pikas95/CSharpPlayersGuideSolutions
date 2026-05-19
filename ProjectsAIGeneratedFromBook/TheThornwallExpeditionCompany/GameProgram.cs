@@ -11,12 +11,11 @@
         _contractorStore = GenerateContractorStore();
         _expeditions = GenerateExpeditions();
         _player = CreatePlayer();
-        _player.HireContractor(new Fighter());
     }
 
     public void Run()
     {
-        while (true) // add gp logic, add heal logic
+        while (true) 
         {
             _renderer.DisplayPlayerAndGP(_player);
             _renderer.DisplayMainMenu();
@@ -25,17 +24,8 @@
             {
                 case 1: ExpeditionMenu(); break;
                 case 2: ContractorStore(); break;
+                case 0: return;
             }
-            // before starting the expedition make rolereport
-            // and waitforenter before start
-
-
-            // after finished expedition, displayed gained GP, current health
-            // display contractor loses(and remove them)
-
-
-            // show other available expeditions
-            // create a class to store contractors, GP
         }
     }
 
@@ -50,7 +40,7 @@
 
             if (choice == 0)
                 return;
-            else
+            else if (_player.ContractorCount != 0)
             {
                 _renderer.DisplayOwnedContractors(_player.Contractors);
                 _renderer.DisplayMissingRolesReport(_player.MissingRolesReport());
@@ -61,6 +51,12 @@
                     return;
                 }
             }
+            else
+            {
+                _renderer.DisplayMessage("You can't start expedition without any contractors in your team", ConsoleColor.White);
+                return;
+            }
+                
         }
 
     }
@@ -69,7 +65,8 @@
     {
         for (int i = 0; i < expedition.Events.Length && !_player.ContractorsAreWiped(); i++)
         {
-            _renderer.DisplayExpeditionProgress(i, expedition.Events.Length);
+            // display before event
+            _renderer.DisplayExpeditionProgress(i + 1, expedition.Events.Length);
             _renderer.DisplayExpedition(expedition);
 
             _renderer.DisplayPlayerAndGP(_player);
@@ -84,19 +81,39 @@
             else if (expedition.Events[i] is RoleTypeEvent roleTypeEvent)
                 RoleTypeEventHandler(roleTypeEvent);
 
-            if (expedition.Events[i].EventCompleted())
-                _player.ReceiveEventReward(expedition.Events[i].GrantEventReward());
+            _player.TryReceiveEventReward(expedition.Events[i]);
 
-            // display expedition Event: assault - begin combat,
-            // trap - force to solve(if no trapper receive damage immediately),
-            // puzzle/treasure ask to do it or go to other event
+            expedition.UpdateAfterEvent(i);
+            _player.UpdateAfterEvent();
 
-            // after event display status - contractors health; actions for healing
-            // display what event awaits
-            // wait for enter
+            // display after event
+            _renderer.DisplayExpeditionProgress(i + 1, expedition.Events.Length);
+            _renderer.DisplayExpedition(expedition);
+
+            _renderer.DisplayPlayerAndGP(_player);
+            _renderer.DisplayOwnedContractors(_player.Contractors);
+
+            _renderer.DisplayAfterEventActions();
+            int action = _input.AskForIntInRange("What do you want to do? ", 1, 2);
+
+            switch (action)
+            {
+                case 1: HealMenu(); break;
+                default: break;
+            }
         }
 
-        // add logic for displaying expedition outcome
+        _player.UpdateGPAfterExpedition();
+
+        _renderer.DisplayExpeditionResult(expedition, _player);
+
+        _input.WaitForEnter("Press enter to return to main menu");
+
+        _player.UpdateContractorsAfterExpedition();
+
+        // display contractor loses(and remove them)
+
+        // generate better
     }
 
     private void AssaultEventHandler(AssaultEvent assaultEvent)
@@ -108,9 +125,6 @@
                 {
                     _renderer.DisplayAssaultEvent(assaultEvent, i);
                     _renderer.DisplayBattleVersus(_player.Contractors, assaultEvent.Enemies);
-                    
-                    if (i > 1)
-                        _renderer.DisplayEnemyAttackMessage();
 
                     _input.AskForTargetOfAttacker(assaultEvent.Enemies, contractor).ReceiveDamage(contractor.Attack());
 
@@ -124,10 +138,12 @@
 
                 _renderer.DisplayAssaultEvent(assaultEvent, i);
                 _renderer.DisplayBattleVersus(_player.Contractors, assaultEvent.Enemies);
+
+                _renderer.DisplayMessage("Enemies attacked your team!", ConsoleColor.Red);
             }
             else break;
 
-            _input.WaitForEnter("Press enter to end round.");
+            _input.WaitForEnter("Press enter to end round");
         }
 
         _renderer.DisplayEvent(assaultEvent);
@@ -139,37 +155,147 @@
 
     private void RoleTypeEventHandler(RoleTypeEvent roleTypeEvent)
     {
-        while (roleTypeEvent.LeftTryCount > 0)
+        Contractor? requiredContractor = _player.GetRoleTypeContractor(roleTypeEvent.RoleRequired);
+
+        _renderer.DisplayEncounteredEvent(roleTypeEvent);
+        _renderer.DisplayRoleTypeEventRequirements(roleTypeEvent);
+        _renderer.DisplayDoesPlayerMeetRequirements(requiredContractor);
+
+        if (requiredContractor != null)
         {
-            roleTypeEvent.Try(_player);
+            while (roleTypeEvent.LeftTryCount > 0 && !roleTypeEvent.EventCompleted())
+            {
+                _renderer.DisplayLeftTryCount(roleTypeEvent.LeftTryCount);
+
+                if (roleTypeEvent.LeftTryCount != roleTypeEvent.MaxTries)
+                    _renderer.DisplayRoleTypeEventTryOutcome(roleTypeEvent.EventCompleted());
+
+                _input.WaitForEnter("Press enter to try");
+
+                roleTypeEvent.Try(requiredContractor);
+            }
         }
+
+        if (!roleTypeEvent.EventCompleted() && roleTypeEvent is TrapEvent trapEvent)
+        {
+            trapEvent.DealTrapDamage(_player.Contractors);
+            _renderer.DisplayMessage("Trap activated and dealt damage to your team!", ConsoleColor.Red);
+        }
+
+        _input.WaitForEnter("Press enter to continue");
+    }
+
+    private void HealMenu()
+    {
+        while (_player.HaveHealers() && _player.AnyHealerCanPerformHealing() && !_player.AllContractorsFullHP())
+        {
+            for (int i = 0; i < _player.Contractors.Length && !_player.AllContractorsFullHP(); i++)
+                if (_player.Contractors[i] != null && _player.Contractors[i] is IHealer healer && healer.HealCooldown == 0)
+                {
+                    _renderer.DisplayOwnedContractors(_player.Contractors);
+                    _renderer.DisplayHealOptions(healer);
+                    _renderer.DisplayReturnOption();
+
+                    int healingType = _input.AskForIntInRange("What type of heal to apply? ", 0, 3);
+
+                    switch (healingType)
+                    {
+                        case 1:
+                            healer.HealSelf(); 
+                            break;
+                        case 2:
+                            _renderer.DisplayOwnedContractors(_player.Contractors);
+                            Contractor target = _input.AskForTargetOfHealer(_player.Contractors);
+                            if (target == healer)
+                                healer.HealSelf();
+                            else
+                                healer.HealTarget(target);
+                            break;
+                        case 3:
+                            healer.HealAll(_player.Contractors);
+                            break;
+                        default: 
+                            return;
+                    }
+
+                    _renderer.DisplayMessage("Healing successfull!\n", ConsoleColor.Green);
+                }
+        }
+
+        _renderer.DisplayOwnedContractors(_player.Contractors);
+
+        if (_player.AllContractorsFullHP())
+            _input.WaitForEnter("All contractors have full health. Press enter to continue to next event");
+        else if (_player.HaveHealers())
+            _input.WaitForEnter("Healers under cooldown. Press enter to continue to next event");
+        else
+            _input.WaitForEnter("You can't perform healing. Press enter to continue to next event");
+
     }
 
     private void ContractorStore()
     {
         while (true)
         {
+            _renderer.DisplayPlayerAndGP(_player);
             _renderer.DisplayRolesReport(_player.RolesReport());
             _renderer.DisplayHirableContractors(_contractorStore);
+            _renderer.DisplayContractorStoreActions(_player.ContractorCount != 0);
             _renderer.DisplayReturnOption();
 
-            int input = _input.AskForIntInRange("Which contractor you wish to hire? ", 0, _contractorStore.Length);
+            int action = _input.AskForIntInRange("What do you want to do? ", 0, _player.ContractorCount != 0 ? 2 : 1);
 
-            if (input == 0)
+            switch (action)
             {
-                Console.Clear();
-                return;
+                case 0: return;
+                case 1: HireContractor(); break;
+                case 2: DismissContractor(); break;
+            }
+        }    
+        
+        void HireContractor()
+        {
+            _renderer.DisplayPlayerAndGP(_player);
+            _renderer.DisplayRolesReport(_player.RolesReport());
+            _renderer.DisplayHirableContractors(_contractorStore);
+
+            int input = _input.AskForIntInRange("Which contractor do you wish to hire? ", 1, _contractorStore.Length);
+            // contractors are displayed index + 1 in console
+
+            if (_player.HireContractor(_contractorStore[input - 1]))
+            {
+                _contractorStore[input - 1] = null!;
+                SortContractorStore();
+
+                _renderer.DisplayMessage("Contractor was successfully hired", ConsoleColor.Green);
             }
             else
             {
-                // contractors are displayed index + 1 in console
-                _player.HireContractor(_contractorStore[input - 1]);
-                _contractorStore[input - 1] = null!;
-                SortContractorStore();
+                if (_player.ContractorCount == _player.Contractors.Length)
+                    _renderer.DisplayMessage("Your team is full!", ConsoleColor.Red);
+                else
+                    _renderer.DisplayMessage("Not enough GP!", ConsoleColor.Red);
             }
+        }
 
-            Console.Clear();
-        }        
+        void DismissContractor()
+        {
+            _renderer.DisplayPlayerAndGP(_player);
+            _renderer.DisplayOwnedContractors(_player.Contractors);
+
+            int input = _input.AskForIntInRange("Which contractor you wish to dismiss? ", 1, _player.ContractorCount);
+            Contractor dismissed = _player.DismissContractor(input - 1);
+            // contractors are displayed index + 1 in console
+
+            _renderer.DisplayMessage($"{dismissed.Name} was dissmissed", ConsoleColor.Green);
+
+            for (int i = 0; i < _contractorStore.Length; i++) 
+                if (_contractorStore[i] == null)
+                {
+                    _contractorStore[i] = dismissed;
+                    return;
+                }
+        }
     }
 
     private void SortContractorStore()

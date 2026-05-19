@@ -3,13 +3,36 @@
     public void DisplayMainMenu()
     {
         Console.WriteLine("[1] Start Expedition\n" +
-                          "[2] Enter Contractor Store");
+                          "[2] Enter Contractor Store\n" +
+                          "[0] Exit");
+    }
+
+    public void DisplayContractorStoreActions(bool playerHasContractor)
+    {
+        Console.WriteLine("[1] Hire a contractor");
+
+        if (playerHasContractor)
+            Console.WriteLine("[2] Dismiss a contractor");
+    }
+
+    public void DisplayAfterEventActions()
+    {
+        Console.WriteLine("[1] Heal\n" +
+                          "[2] Continue");
+    }
+
+    public void DisplayHealOptions(IHealer healer)
+    {
+        Console.WriteLine($"Healer: {healer.Name}");
+        Console.WriteLine("[1] Heal Self\n" +
+                          "[2] Heal Target\n" +
+                          "[3] Heal All");
     }
 
     public void DisplayPlayerAndGP(Player player)
     {
         Console.ForegroundColor = ConsoleColor.Magenta;
-        Console.WriteLine($"{player.Name} | {player.GP} GP");
+        Console.WriteLine($"{player.Name} | {player.GP} GP | Daily Rate: {player.DailyContractorsGPRate} GP"); ;
         Console.ResetColor();
     }
 
@@ -68,23 +91,43 @@
 
     public void DisplayOwnedContractors(Contractor[] contractors)
     {
-        string contractorsReport = null!;
-        foreach (Contractor contractor in contractors) 
-            if (contractor != null)
-                contractorsReport += $"{contractor}\n";
+        Console.WriteLine("Your contractors: ");
+        bool anyContractorsPrinted = false;
 
-        Console.WriteLine(contractorsReport == null ? "No contractors hired" : "Your Contractors:\n" + contractorsReport);
+        for (int i = 0; i < contractors.Length; i++)
+            if (contractors[i] != null)
+            {
+                Console.ForegroundColor = DetermineColorOfContractor(contractors[i]);
+                Console.Write($"[{i + 1}] {contractors[i]}\n");
+                Console.ResetColor();
+                anyContractorsPrinted = true;
+            }
+
+        if (!anyContractorsPrinted)
+            Console.WriteLine("no contractors hired");
+
+        Console.WriteLine();
     }
 
     public void DisplayHirableContractors(Contractor[] pool)
     {
-        string poolText = null!;
+        Console.WriteLine("Hirable Contractors:");
+
+        bool anyContractorsPrinted = false;
 
         for (int i = 0; i < pool.Length; i++)
             if (pool[i] != null)
-                poolText += $"[{i + 1}] {pool[i]}\n";
+            {
+                Console.ForegroundColor = DetermineColorOfContractor(pool[i]);
+                Console.Write($"[{i + 1}] {pool[i]}\n");
+                Console.ResetColor();
+                anyContractorsPrinted = true;
+            }
 
-        Console.WriteLine(poolText == null ? "Contractor pool is empty\n" : poolText);
+        if (!anyContractorsPrinted)
+            Console.WriteLine("Contractor pool is empty");
+
+        Console.WriteLine();
     }
 
     public void DisplayEncounteredEvent(ExpeditionEvent expeditionEvent)
@@ -118,31 +161,71 @@
         Console.ResetColor();
     }
 
+    public void DisplayRoleTypeEventRequirements(RoleTypeEvent roleTypeEvent)
+    {
+        if (roleTypeEvent is TrapEvent)
+            DisplayRules("disarming");
+        else if (roleTypeEvent is PuzzleEvent)
+            DisplayRules("solving");
+        else if (roleTypeEvent is TreasureEvent)
+            DisplayRules("picklocking");
+
+        void DisplayRules(string action)
+        {
+            Console.WriteLine($"{roleTypeEvent.EventType} is an event that requires contractor with {roleTypeEvent.RoleRequired} role to try {action}");
+        }
+    }
+
+    public void DisplayDoesPlayerMeetRequirements(Contractor? contractor)
+    {
+        if (contractor == null)
+            Console.WriteLine("You do not have a contractor with required role");
+        else
+            Console.WriteLine($"Your contractor {contractor.Name} has required role and can try completing event");
+
+        Console.WriteLine();
+    }
+
+    public void DisplayLeftTryCount(int leftTryCount)
+    {
+        Console.WriteLine($"Left tries: {leftTryCount}");
+    }
+
+    public void DisplayRoleTypeEventTryOutcome(bool isSolved)
+    {
+        if (isSolved)
+            Console.WriteLine("Event was completed!");
+        else
+            Console.WriteLine("You failed");
+    }
+
     public void DisplayBattleVersus(Contractor[] contractors, Enemy[] enemies)
     {
         for (int i = 0; i < (contractors.Length > enemies.Length ? contractors.Length : enemies.Length); i++)
         {
-            Combatant contractor = i < contractors.Length ? contractors[i] : null!;
-            Combatant enemy = i < enemies.Length ? enemies[i] : null!;
+            Combatant? contractor = i < contractors.Length ? contractors[i] : null;
+            Combatant? enemy = i < enemies.Length ? enemies[i] : null;
 
             if (contractor == null && enemy == null)
                 return;
-
             
-            PrintCombatant(contractor!);
+            PrintCombatant(contractor);
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" | ");
 
-            Console.Write($"[{i + 1}] ");
-            PrintCombatant(enemy!);
+            if (enemy != null)
+                Console.Write($"[{i + 1}] ");
 
+            PrintCombatant(enemy);
+
+            Console.ResetColor();
             Console.WriteLine();
         }
 
         Console.WriteLine();
 
-        void PrintCombatant(Combatant combatant)
+        void PrintCombatant(Combatant? combatant)
         {
             if (combatant != null)
             {
@@ -161,13 +244,6 @@
         }
     }
 
-    public void DisplayEnemyAttackMessage()
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Enemies attacked your team!");
-        Console.ResetColor();
-    }
-
     public void DisplayBattleOutcome(bool playerWon)
     {
         if (playerWon)
@@ -180,6 +256,43 @@
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("You've lost...");
         }
+        Console.ResetColor();
+    }
+
+    public void DisplayExpeditionResult(Expedition expedition, Player player)
+    {
+        Console.Write("You've completed: ");
+        DisplayExpedition(expedition);
+
+        if (player.ContractorsAreWiped())
+            Console.WriteLine("Your contractors were wiped out!");
+        else
+            DisplayOwnedContractors(player.Contractors);
+
+        Console.WriteLine();
+
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.WriteLine($"Completed events: {expedition.GetCompletedEventsCount()}/{expedition.Events.Length} | Gained GP: {expedition.RewardedGP}");
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"Alive contractors took {player.DailyContractorsGPRate} GP for the expedition");
+        Console.WriteLine();
+        Console.ResetColor();
+    }
+
+    public ConsoleColor DetermineColorOfContractor(Contractor contractor)
+    {
+        if (contractor is Fighter)
+            return ConsoleColor.DarkYellow;
+        if (contractor is Medic)
+            return ConsoleColor.DarkBlue;
+
+        return ConsoleColor.DarkGreen;
+    }
+
+    public void DisplayMessage(string text, ConsoleColor color)
+    {
+        Console.ForegroundColor = color;
+        Console.WriteLine(text);
         Console.ResetColor();
     }
 
