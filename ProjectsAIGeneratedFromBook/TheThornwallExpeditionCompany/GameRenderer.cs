@@ -4,6 +4,7 @@
     {
         Console.WriteLine("[1] Start Expedition\n" +
                           "[2] Enter Contractor Store\n" +
+                          "[3] Wait a Day\n" +
                           "[0] Exit");
     }
 
@@ -26,29 +27,28 @@
         Console.WriteLine($"Healer: {healer.Name}");
         Console.WriteLine("[1] Heal Self\n" +
                           "[2] Heal Target\n" +
-                          "[3] Heal All");
+                          "[3] Heal All\n" +
+                          "[4] Skip Healer");
     }
 
     public void DisplayPlayerAndGP(Player player)
     {
         Console.ForegroundColor = ConsoleColor.Magenta;
-        Console.WriteLine($"{player.Name} | {player.GP} GP | Daily Rate: {player.DailyContractorsGPRate} GP"); ;
+        Console.WriteLine($"{player.Name} | {player.GP} GP | Daily Rate: {player.DailyContractorsGPRate} GP");
         Console.ResetColor();
     }
 
-    public void DisplayAllExpeditions(Expedition[] expeditions)
+    public void DisplayAllExpeditions(Expedition?[] expeditions)
     {
         Console.WriteLine("Available Expeditions:");
 
         for (int i = 0; i < expeditions.Length; i++)
         {
-            Console.ForegroundColor = expeditions[i].Difficulty switch
+            if (expeditions[i] != null)
             {
-                Difficulty.Easy => ConsoleColor.Green,
-                Difficulty.Medium => ConsoleColor.DarkYellow,
-                Difficulty.Hard => ConsoleColor.Red,
-            };
-            Console.WriteLine($"[{i + 1}] {expeditions[i]}");
+                Console.ForegroundColor = DetermineColorOfExpedition(expeditions[i]!);
+                Console.WriteLine($"[{i + 1}] {expeditions[i]}");
+            }
         }
         Console.ResetColor();
     }
@@ -89,7 +89,7 @@
         Console.WriteLine();
     }
 
-    public void DisplayOwnedContractors(Contractor[] contractors)
+    public void DisplayOwnedContractors(Contractor?[] contractors)
     {
         Console.WriteLine("Your contractors: ");
         bool anyContractorsPrinted = false;
@@ -97,19 +97,35 @@
         for (int i = 0; i < contractors.Length; i++)
             if (contractors[i] != null)
             {
-                Console.ForegroundColor = DetermineColorOfContractor(contractors[i]);
-                Console.Write($"[{i + 1}] {contractors[i]}\n");
-                Console.ResetColor();
-                anyContractorsPrinted = true;
+                if (contractors[i]!.Health > 0)
+                    DisplayAlive(i);
+                else
+                    DisplayDead(i);
             }
 
         if (!anyContractorsPrinted)
             Console.WriteLine("no contractors hired");
 
         Console.WriteLine();
+
+        void DisplayAlive(int index)
+        {
+            Console.ForegroundColor = DetermineColorOfContractor(contractors[index]!);
+            Console.Write($"[{index + 1}] {contractors[index]}\n");
+            Console.ResetColor();
+            anyContractorsPrinted = true;
+        }
+
+        void DisplayDead(int index)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.Write($"[{index + 1}] {contractors[index]!.Name} DEAD\n");
+            Console.ResetColor();
+            anyContractorsPrinted = true;
+        }
     }
 
-    public void DisplayHirableContractors(Contractor[] pool)
+    public void DisplayHirableContractors(Contractor?[] pool)
     {
         Console.WriteLine("Hirable Contractors:");
 
@@ -118,7 +134,7 @@
         for (int i = 0; i < pool.Length; i++)
             if (pool[i] != null)
             {
-                Console.ForegroundColor = DetermineColorOfContractor(pool[i]);
+                Console.ForegroundColor = DetermineColorOfContractor(pool[i]!);
                 Console.Write($"[{i + 1}] {pool[i]}\n");
                 Console.ResetColor();
                 anyContractorsPrinted = true;
@@ -140,10 +156,11 @@
     }
     private ConsoleColor DetermineColorOfEvent(ExpeditionEvent expeditionEvent)
     {
-        if (expeditionEvent is AssaultEvent)
-            return ConsoleColor.DarkRed;
-
-        return ConsoleColor.Blue;
+        return expeditionEvent switch
+        {
+            AssaultEvent => ConsoleColor.DarkRed,
+            _ => ConsoleColor.Blue
+        };
     }
 
     public void DisplayEvent(ExpeditionEvent expeditionEvent)
@@ -168,7 +185,7 @@
         else if (roleTypeEvent is PuzzleEvent)
             DisplayRules("solving");
         else if (roleTypeEvent is TreasureEvent)
-            DisplayRules("picklocking");
+            DisplayRules("pick-locking");
 
         void DisplayRules(string action)
         {
@@ -178,10 +195,9 @@
 
     public void DisplayDoesPlayerMeetRequirements(Contractor? contractor)
     {
-        if (contractor == null)
-            Console.WriteLine("You do not have a contractor with required role");
-        else
-            Console.WriteLine($"Your contractor {contractor.Name} has required role and can try completing event");
+        Console.WriteLine(contractor == null
+            ? "You do not have a contractor with required role"
+            : $"Your contractor {contractor.Name} has required role and can try completing event");
 
         Console.WriteLine();
     }
@@ -193,13 +209,10 @@
 
     public void DisplayRoleTypeEventTryOutcome(bool isSolved)
     {
-        if (isSolved)
-            Console.WriteLine("Event was completed!");
-        else
-            Console.WriteLine("You failed");
+        Console.WriteLine(isSolved ? "Event was completed!" : "You failed");
     }
 
-    public void DisplayBattleVersus(Contractor[] contractors, Enemy[] enemies)
+    public void DisplayBattleVersus(Contractor?[] contractors, Enemy[] enemies)
     {
         for (int i = 0; i < (contractors.Length > enemies.Length ? contractors.Length : enemies.Length); i++)
         {
@@ -279,14 +292,14 @@
         Console.ResetColor();
     }
 
-    public ConsoleColor DetermineColorOfContractor(Contractor contractor)
+    private ConsoleColor DetermineColorOfContractor(Contractor contractor)
     {
-        if (contractor is Fighter)
-            return ConsoleColor.DarkYellow;
-        if (contractor is Medic)
-            return ConsoleColor.DarkBlue;
-
-        return ConsoleColor.DarkGreen;
+        return contractor switch
+        {
+            Fighter => ConsoleColor.DarkYellow,
+            Medic => ConsoleColor.DarkBlue,
+            _ => ConsoleColor.DarkGreen
+        };
     }
 
     public void DisplayMessage(string text, ConsoleColor color)

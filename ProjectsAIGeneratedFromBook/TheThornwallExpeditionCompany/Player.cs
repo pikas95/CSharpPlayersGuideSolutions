@@ -1,7 +1,7 @@
 ﻿internal class Player
 {
     public string Name { get; }
-    public Contractor[] Contractors { get; protected set; } = new Contractor[5];
+    public Contractor?[] Contractors { get; protected set; } = new Contractor[5];
     public int ContractorCount { get; protected set; }
     public int GP { get; protected set; }
     public int DailyContractorsGPRate { get; protected set; }
@@ -24,9 +24,9 @@
 
     public Contractor DismissContractor(int index) 
     {
-        DailyContractorsGPRate -= Contractors[index].DailyRate;
-        Contractor dismiss = Contractors[index];
-        Contractors[index] = null!;
+        DailyContractorsGPRate -= Contractors[index]!.DailyRate;
+        Contractor dismiss = Contractors[index]!;
+        Contractors[index] = null;
         SortContractors();
         ContractorCount--;
         return dismiss;
@@ -49,7 +49,7 @@
 
     public Contractor? GetRoleTypeContractor(RoleType roleType)
     {
-        foreach (Contractor contractor in Contractors)
+        foreach (Contractor? contractor in Contractors)
             if (contractor?.Roles.Contains(roleType) == true && contractor.Health > 0)
                 return contractor;
 
@@ -61,7 +61,7 @@
         string report = "Covered Roles:\n";
 
         // adds covered roles into report
-        foreach (Contractor contractor in Contractors)
+        foreach (Contractor? contractor in Contractors)
             if (contractor != null)
                 report += $"{contractor.Name}: {contractor.RoleList()}\n";
 
@@ -78,7 +78,7 @@
 
     public string MissingRolesReport()
     {
-        string report = null!;
+        string? report = null;
         RoleType[] allRoles = Enum.GetValues<RoleType>();
         bool[] found = new bool[allRoles.Length];
 
@@ -86,7 +86,7 @@
         {
             for (int j = 0; j < Contractors.Length; j++)
             {
-                if (Contractors[j] != null && Contractors[j].Roles.Contains(allRoles[i]))
+                if (Contractors[j] != null && Contractors[j]!.Roles.Contains(allRoles[i]))
                 {
                     found[i] = true;
                     break;
@@ -112,7 +112,7 @@
 
     public bool AllContractorsFullHP()
     {
-        foreach (Contractor contractor in Contractors)
+        foreach (Contractor? contractor in Contractors)
             if (contractor?.Health < contractor?.MaxHealth)
                 return false;
 
@@ -121,7 +121,7 @@
 
     public bool HaveHealers()
     {
-        foreach (Contractor contractor in Contractors)
+        foreach (Contractor? contractor in Contractors)
             if (contractor is IHealer)
                 return true;
 
@@ -130,7 +130,7 @@
 
     public bool AnyHealerCanPerformHealing()
     {
-        foreach (Contractor contractor in Contractors)
+        foreach (Contractor? contractor in Contractors)
             if (contractor is IHealer healer && healer.HealCooldown == 0)
                 return true;
 
@@ -139,32 +139,39 @@
 
     public bool ContractorsAreWiped()
     {
-        foreach (Contractor contractor in Contractors)
+        foreach (Contractor? contractor in Contractors)
             if (contractor?.Health > 0)
                 return false;
 
         return true;
     }
 
-    public void UpdateGPAfterExpedition()
+    public void PayContractorsAfterExpedition()
     {
         for (int i = 0; i < Contractors.Length; i++)
             if (Contractors[i]?.Health == 0)
-                DailyContractorsGPRate -= Contractors[i].DailyRate;
+                DailyContractorsGPRate -= Contractors[i]!.DailyRate;
 
         GP -= DailyContractorsGPRate;
     }
 
-    public void UpdateContractorsAfterExpedition()
+    public void ResetContractors()
     {
-        foreach (Contractor contractor in Contractors)
+        foreach (Contractor? contractor in Contractors)
             if (contractor?.Health > 0)
                 contractor.Reset();
     }
 
+    public void RemoveAnyDeadContractor()
+    {
+        for (int i = 0; i < Contractors.Length; i++)
+            if (Contractors[i]?.Health == 0)
+                Contractors[i] = null;
+    }
+
     public void UpdateAfterEvent()
     {
-        foreach (Contractor contractor in Contractors)
+        foreach (Contractor? contractor in Contractors)
             if (contractor is IHealer healer)
                 healer.DecrementCooldown();
     }

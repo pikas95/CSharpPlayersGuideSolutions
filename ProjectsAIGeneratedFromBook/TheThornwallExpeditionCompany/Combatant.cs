@@ -3,8 +3,8 @@
     public string Name { get; }
     public int Health { get; protected set; }
     public int MaxHealth { get; }
-    protected int MinDamage { get; set; }
-    protected int MaxDamage { get; set; }
+    protected int MinDamage { get; }
+    protected int MaxDamage { get; }
     protected static Random Random { get; } = new Random();
     public Combatant(string name, int maxHealth, int minDamage, int maxDamage)
     {

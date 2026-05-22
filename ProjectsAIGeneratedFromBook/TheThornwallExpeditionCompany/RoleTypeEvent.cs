@@ -1,7 +1,7 @@
 ﻿internal class RoleTypeEvent : ExpeditionEvent
 {
     public RoleType RoleRequired { get; }
-    protected bool IsSolved { get; set; } = false;
+    protected bool IsSolved { get; set; }
     public int MaxTries { get; } = 3;
     public int LeftTryCount { get; protected set; }
     public RoleTypeEvent(string name, EventType eventType, RoleType roleType, int eventRewardGP) 

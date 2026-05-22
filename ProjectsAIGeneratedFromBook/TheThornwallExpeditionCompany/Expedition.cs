@@ -3,14 +3,15 @@
     public string Name { get; }
     public string Destination { get; protected set; }
     public ExpeditionEvent[] Events { get; protected set; }
-    public Difficulty Difficulty { get; protected set; }
+    public Difficulty Difficulty { get;}
     public int CompletedEvents { get; protected set; } = 0;
     public int RewardedGP { get; protected set; } = 0;
     
-    public Expedition(string name, string destination, ExpeditionEvent[] events)
+    public Expedition(string name, string destination, Difficulty difficulty, ExpeditionEvent[] events)
     {
         Name = name;
         Destination = destination;
+        Difficulty = difficulty;
         Events = events;
     }
 

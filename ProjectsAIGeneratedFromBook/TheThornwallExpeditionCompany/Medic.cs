@@ -4,8 +4,8 @@
     protected const int _defaultDailyRate = 35;
     protected const int _defaultMinDamage = 1;
     protected const int _defaultMaxDamage = 8;
-    protected int MinHeal { get; set; }
-    protected int MaxHeal { get; set; }
+    protected int MinHeal { get; }
+    protected int MaxHeal { get; }
     public int HealCooldown { get; protected set; }
 
     public Medic() : base("Medic", _defaultHealth, _defaultDailyRate, _defaultMinDamage, _defaultMaxDamage)
@@ -22,16 +22,16 @@
         MaxHeal = DeclareMaxHeal();
         Roles = roles;
     }
-
-    public Medic(string name, int maxHealth, int dailyRate, int minHeal, int maxHeal, RoleType[] roles)
-        : base(name, maxHealth, dailyRate, _defaultMinDamage, _defaultMaxDamage)
+    
+    public Medic(string name, int maxHealth, int dailyRate, int minDamage, int maxDamage, RoleType[] roles) 
+        : base(name, maxHealth, dailyRate, minDamage, maxDamage)
     {
-        MinHeal = minHeal;
-        MaxHeal = maxHeal;
+        MinHeal = DeclareMinHeal();
+        MaxHeal = DeclareMaxHeal();
         Roles = roles;
     }
 
-    public Medic(string name, int maxHealth, int dailyRate, int minHeal, int maxHeal, int minDamage, int maxDamage, RoleType[] roles)
+    public Medic(string name, int maxHealth, int dailyRate, int minDamage, int maxDamage, RoleType[] roles, int minHeal, int maxHeal)
         : base(name, maxHealth, dailyRate, minDamage, maxDamage)
     {
         MinHeal = minHeal;
@@ -45,18 +45,16 @@
 
     protected int Heal() => Random.Next(MinHeal, MaxHeal);
 
-    public bool HealTarget(Contractor contractor)
+    public void HealTarget(Contractor contractor)
     {
         if (HealCooldown == 0)
         {
             contractor.ApplyHealing(Heal());
             HealCooldown = 2;
-            return true;
         }
-        return false;
     }
 
-    public bool HealAll(Contractor[] contractors)
+    public void HealAll(Contractor?[] contractors)
     {
         if (HealCooldown == 0)
         {
@@ -66,21 +64,16 @@
                 contractors[i]?.ApplyHealing(healing / 2);
 
             HealCooldown = 3;
-
-            return true;
         }
-        return false;
     }
 
-    public bool HealSelf()
+    public void HealSelf()
     {
         if (HealCooldown == 0)
         {
             Health = MaxHealth;
             HealCooldown = 1;
-            return true;
         }
-        return false;
     }
 
     public void DecrementCooldown()

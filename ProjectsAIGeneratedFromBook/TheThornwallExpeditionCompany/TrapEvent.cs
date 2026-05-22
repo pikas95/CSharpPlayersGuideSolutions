@@ -1,6 +1,4 @@
-﻿using System.Security;
-
-internal class TrapEvent : RoleTypeEvent
+﻿internal class TrapEvent : RoleTypeEvent
 {
     protected int TrapDamage { get; }
     public TrapEvent(int trapDamage) : base("Trap", EventType.Trap, RoleType.Trapper, 35)
@@ -8,10 +6,10 @@ internal class TrapEvent : RoleTypeEvent
         TrapDamage = trapDamage;
     }
 
-    public void DealTrapDamage(Contractor[] contractors)
+    public void DealTrapDamage(Contractor?[] contractors)
     {
         for (int i = 0; i < contractors.Length; i++)
             if (contractors[i]?.Health > 0)
-                contractors[i].ReceiveDamage(TrapDamage);
+                contractors[i]!.ReceiveDamage(TrapDamage);
     }
 }

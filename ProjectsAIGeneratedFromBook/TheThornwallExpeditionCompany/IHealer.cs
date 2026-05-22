@@ -2,9 +2,9 @@
 {
     public string Name { get; }
     public int HealCooldown { get; }
-    bool HealTarget(Contractor contractor);
-    bool HealAll(Contractor[] contractors);
-    bool HealSelf();
+    void HealTarget(Contractor contractor);
+    void HealAll(Contractor?[] contractors);
+    void HealSelf();
     void DecrementCooldown();
     void Reset();
 }

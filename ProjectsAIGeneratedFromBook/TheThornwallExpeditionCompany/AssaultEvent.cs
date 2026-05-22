@@ -8,9 +8,9 @@
 
     public void EnemyAttackTurn(Player player)
     {
-        for (int i = 0; i < Enemies.Length; i++)
-            if (Enemies[i].Health > 0)
-                player.Contractors[Random.Next(0, player.ContractorCount)].ReceiveDamage(Enemies[i].Attack());
+        foreach (Enemy enemy in Enemies)
+            if (enemy.Health > 0)
+                player.Contractors[Random.Next(0, player.ContractorCount)]!.ReceiveDamage(enemy.Attack());
     }
 
     public override bool EventCompleted()
