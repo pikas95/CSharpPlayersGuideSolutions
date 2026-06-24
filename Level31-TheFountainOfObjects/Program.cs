@@ -186,32 +186,6 @@ internal class FountainOfObjectsGame
     }
 }
 
-internal class Player : WorldEntity
-{
-    public bool IsAlive { get; private set; } = true;
-    public string DeathCause { get; private set; } = "";
-    public int Arrows { get; private set; } = 5;
-    
-    public Player(Location location) : base(location) { }
-
-    public void Move(int row, int col) => Location = new Location(Location.Row + row, Location.Col + col);
-
-    public bool Shoot()
-    {
-        if (Arrows <= 0)
-            return false;
-
-        Arrows--;
-        return true;
-    }
-
-    public void Kill(string reason)
-    {
-        IsAlive = false;
-        DeathCause = reason;
-    }
-}
-
 internal record Location(int Row, int Col);
 
 internal class Map
@@ -274,16 +248,48 @@ internal class WorldEntity
     public WorldEntity(Location location) { Location = location; }
 }
 
-internal abstract class Monster : WorldEntity
+internal class Pawn : WorldEntity
 {
-    public bool IsAlive { get; private set; } = true;
+    public bool IsAlive { get; protected set; } = true;
+    public Pawn(Location location) : base(location) { }
+
+    protected void Kill() => IsAlive = false;
+}
+
+internal class Player : Pawn
+{
+    public string DeathCause { get; private set; } = "";
+    public int Arrows { get; private set; } = 5;
+
+    public Player(Location location) : base(location) { }
+
+    public void Move(int row, int col) => Location = new Location(Location.Row + row, Location.Col + col);
+
+    public bool Shoot()
+    {
+        if (Arrows <= 0)
+            return false;
+
+        Arrows--;
+        return true;
+    }
+
+    public void Kill(string reason)
+    {
+        base.Kill();
+        DeathCause = reason;
+    }
+}
+
+internal abstract class Monster : Pawn
+{
     public string SenseText { get; }
 
     protected Monster(Location location, string senseText) : base(location) { SenseText = senseText; }
 
     public abstract void ActAgainstPlayer(Player player, Map map);
 
-    public void Kill() => IsAlive = false;
+    public new void Kill() => base.Kill();
 }
 
 internal class Maelstrom : Monster
@@ -386,7 +392,7 @@ internal class ShootCommand : ICommand
         return true;
     }
 
-    protected Monster? CheckForTargetInLocation(Monster[] monsters, Location location)
+    protected static Monster? CheckForTargetInLocation(Monster[] monsters, Location location)
     {
         for (int i = 0; i < monsters.Length; i++)
             if (location == monsters[i].Location)
@@ -395,6 +401,14 @@ internal class ShootCommand : ICommand
         return null;
     }
 }
+
+internal class ShootNorth : ShootCommand { public ShootNorth() : base(-1, 0) { } }
+
+internal class ShootSouth : ShootCommand { public ShootSouth() : base(1, 0) { } }
+
+internal class ShootWest : ShootCommand { public ShootWest() : base(0, -1) { } }
+
+internal class ShootEast : ShootCommand { public ShootEast() : base(0, 1) { } }
 
 internal class HelpCommand : ICommand
 {
@@ -429,14 +443,6 @@ internal class HelpCommand : ICommand
         return true;
     }
 }
-
-internal class ShootNorth : ShootCommand { public ShootNorth() : base(-1, 0) { } }
-
-internal class ShootSouth : ShootCommand { public ShootSouth() : base(1, 0) { } }
-
-internal class ShootWest : ShootCommand { public ShootWest() : base(0, -1) { } }
-
-internal class ShootEast : ShootCommand { public ShootEast() : base(0, 1) { } }
 
 internal class EnableFountain : ICommand
 {
