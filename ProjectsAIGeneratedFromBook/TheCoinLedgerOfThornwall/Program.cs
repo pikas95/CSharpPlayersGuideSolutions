@@ -109,12 +109,11 @@ internal class LedgerProgram
     {
         Console.Clear();
 
-        if (_ledger.Total > 0)
+        if (_ledger.Transactions.Count > 0)
         {
-            Transaction[] transactions = _ledger.GetAll();
             Console.WriteLine("Transaction history:");
-            for (int i = 0; i < transactions.Length; i++)
-                Console.WriteLine(transactions[i]);
+            for (int i = 0; i < _ledger.Transactions.Count; i++)
+                Console.WriteLine(_ledger.Transactions[i]);
         }
         else
             Console.WriteLine("No transaction history.");
@@ -135,7 +134,7 @@ internal class LedgerProgram
     {
         Console.Clear();
 
-        if (_ledger.Total > 0)
+        if (_ledger.Transactions.Count > 0)
         {
             Transaction largest = _ledger.GetLargest();
             Console.WriteLine("Biggest transaction:");
@@ -157,32 +156,28 @@ internal class LedgerProgram
 
 internal class Ledger
 {
-    private Transaction[] _transactions = new Transaction[100];
-    public int Total { get; private set; } = 0;
+    public List<Transaction> Transactions { get; private set; } = new List<Transaction>();
 
     public bool Add(Transaction newTransaction)
     {
-        if (Total < _transactions.Length && newTransaction.Amount > 0)
+        if (newTransaction.Amount > 0)
         {
-            _transactions[Total] = newTransaction;
-            Total++;
+            Transactions.Add(newTransaction);
             return true;
         }
         return false;
     }
 
-    public Transaction[] GetAll() => _transactions[0..Total];
-
     public (decimal income, decimal expenses, decimal balance) GetSummary() // all transactions summary
     {
         decimal income = 0, expenses = 0;
 
-        for (int i = 0; i < Total; i++)
+        for (int i = 0; i < Transactions.Count; i++)
         {
-            if (_transactions[i].TransactionType == TransactionType.Income)
-                income += _transactions[i].Amount;
+            if (Transactions[i].TransactionType == TransactionType.Income)
+                income += Transactions[i].Amount;
             else
-                expenses += _transactions[i].Amount;
+                expenses += Transactions[i].Amount;
         }
 
         decimal balance = income - expenses;
@@ -193,9 +188,9 @@ internal class Ledger
     {
         decimal filteredSummary = 0;
 
-        for (int i = 0; i < Total; i++)
-            if (_transactions[i].TransactionType == filter)
-                filteredSummary += _transactions[i].Amount;
+        for (int i = 0; i < Transactions.Count; i++)
+            if (Transactions[i].TransactionType == filter)
+                filteredSummary += Transactions[i].Amount;
 
         return filteredSummary;
     }
@@ -204,9 +199,9 @@ internal class Ledger
     {
         Transaction largest = new Transaction(); // largest.Amount is 0
 
-        for (int i = 0; i < Total; i++)
-            if (largest.Amount < _transactions[i].Amount)
-                largest = _transactions[i]; // TODO: copy array, don't give reference
+        for (int i = 0; i < Transactions.Count; i++)
+            if (largest.Amount < Transactions[i].Amount)
+                largest = Transactions[i];
 
         return largest;
     }
