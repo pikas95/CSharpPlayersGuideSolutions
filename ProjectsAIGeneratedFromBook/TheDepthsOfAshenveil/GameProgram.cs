@@ -68,16 +68,15 @@
 
     private static void DisplayInventory(Inventory inventory)
     {
-        if (inventory.Weapons[0] == null)
+        if (inventory.Weapons.Count == 0)
             Console.WriteLine("Inventory is empty");
         else
         {
             if (inventory.Full())
                 Console.Write("(Full) ");
             Console.WriteLine("Your inventory: ");
-            for (int i = 0; i < inventory.Weapons.Length; i++)
-                if (inventory.Weapons[i] != null)
-                    Console.WriteLine($"[{i + 1}] {inventory.Weapons[i]!.Name}");
+            for (int i = 0; i < inventory.Weapons.Count; i++)
+                    Console.WriteLine($"[{i + 1}] {inventory.Weapons[i].Name}");
         }
 
         Console.WriteLine();
@@ -100,7 +99,7 @@
                           $"[3] Move Down\n" +
                           $"[4] Move Left");
 
-            if (_player.Inventory.Weapons[0] != null)
+            if (_player.Inventory.Weapons.Count > 0)
             {
                 Console.WriteLine($"[5] Change Equiped Weapon");
                 Console.WriteLine($"[6] Remove Weapon From Inventory");
@@ -154,10 +153,8 @@
                     case 0:
                         return true;
                 };
-
                 break;
             }
-            
             return false;
         }
 
@@ -188,7 +185,7 @@
             {
                 if (input <= 4)
                     return true;
-                else if (_player.Inventory.Weapons[0] != null)
+                else if (_player.Inventory.Weapons.Count > 0)
                 {
                     if (currentRoom is WeaponRoom room && room.Weapon != null && !_player.Inventory.Full() && input <= 7)
                         return true;
@@ -232,7 +229,7 @@
             { // TODO: implement TryParse
                 int input = Convert.ToInt32(Console.ReadLine()) - 1; //  because weapons are displayed as index + 1
 
-                if (input >= 0 && input < _player.Inventory.Weapons.Length && _player.Inventory.Weapons[input] != null) 
+                if (input >= 0 && input < _player.Inventory.Weapons.Count) 
                     return input;
 
                 Console.Write("There is no such weapon. Again: ");

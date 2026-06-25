@@ -15,18 +15,11 @@
 
     public bool RemoveFromInventory(int index) => Inventory.Remove(index);
 
-    public bool EquipWeapon(int weaponIndex)
+    public void EquipWeapon(int weaponIndex)
     {
-        if (Inventory.Weapons[weaponIndex] == null)
-            return false;
-        else
-        {
-            Weapon temp = EquippedWeapon;
-            EquippedWeapon = Inventory.Take(weaponIndex);
-            Inventory.TryAdd(temp);
-        }
-
-        return true;
+        Weapon unequiped = EquippedWeapon;
+        EquippedWeapon = Inventory.Take(weaponIndex);
+        Inventory.TryAdd(unequiped, weaponIndex);
     }
 
     public void Move(int col, int row)

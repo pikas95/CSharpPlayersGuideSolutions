@@ -1,54 +1,35 @@
 ﻿internal class Inventory
 {
-    public Weapon?[] Weapons { get; private set; }
-    public Inventory(int inventorySize) => Weapons = new Weapon[inventorySize];
+    public List<Weapon> Weapons { get; private set; } = new List<Weapon>();
+    protected int InventorySize { get; }
+    public Inventory(int inventorySize) => InventorySize = inventorySize;
 
     public bool TryAdd(Weapon weapon)
     {
-        for (int i = 0; i < Weapons.Length; i++)
-        {
-            if (Weapons[i] == null)
-            {
-                Weapons[i] = weapon;
-                return true;
-            }
-        }
-        return false;
-    }
-    public bool Remove(int index)
-    {
-        if (Weapons[index] == null)
+        if (Full())
             return false;
 
-        Weapons[index] = null;
-        SortInventory();
+        Weapons.Add(weapon);
         return true;
     }
+
+    public bool TryAdd(Weapon weapon, int index)
+    {
+        if (Full())
+            return false;
+        
+        Weapons.Insert(index, weapon);
+        return true;
+    }
+
+    public bool Remove(int index) => Weapons.Remove(Weapons[index]);
+
     public Weapon Take(int index)
     {
-        Weapon weapon = Weapons[index]!;
+        Weapon weapon = Weapons[index];
         Remove(index);
         return weapon;
     }
 
-    private void SortInventory()
-    {
-        for (int i = 0; i < Weapons.Length; i++)
-        {
-            if (Weapons[i] == null)
-            {
-                for (int j = i + 1; j < Weapons.Length; j++)
-                {
-                    if (Weapons[j] != null)
-                    {
-                        Weapons[i] = Weapons[j];
-                        Weapons[j] = null;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    public bool Full() => Weapons[^1] != null; // SortInventory() runs anytime a weapon is removed from Weapons[]
+    public bool Full() => Weapons.Count == InventorySize; 
 }
