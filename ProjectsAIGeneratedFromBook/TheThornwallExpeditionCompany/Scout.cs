@@ -54,13 +54,13 @@
         }
     }
 
-    public void HealAll(Contractor?[] contractors)
+    public void HealAll(List<Contractor> contractors)
     {
         if (HealCooldown == 0)
         {
             int healing = Heal();
 
-            for (int i = 0; i < contractors.Length; i++)
+            for (int i = 0; i < contractors.Count; i++)
                 contractors[i]?.ApplyHealing(healing / 2);
 
             HealCooldown = 3;

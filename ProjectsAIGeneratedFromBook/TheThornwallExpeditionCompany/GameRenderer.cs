@@ -38,11 +38,11 @@
         Console.ResetColor();
     }
 
-    public void DisplayAllExpeditions(Expedition?[] expeditions)
+    public void DisplayAllExpeditions(List<Expedition> expeditions)
     {
         Console.WriteLine("Available Expeditions:");
 
-        for (int i = 0; i < expeditions.Length; i++)
+        for (int i = 0; i < expeditions.Count; i++)
         {
             if (expeditions[i] != null)
             {
@@ -89,12 +89,12 @@
         Console.WriteLine();
     }
 
-    public void DisplayOwnedContractors(Contractor?[] contractors)
+    public void DisplayOwnedContractors(List<Contractor> contractors)
     {
         Console.WriteLine("Your contractors: ");
         bool anyContractorsPrinted = false;
 
-        for (int i = 0; i < contractors.Length; i++)
+        for (int i = 0; i < contractors.Count; i++)
             if (contractors[i] != null)
             {
                 if (contractors[i]!.Health > 0)
@@ -125,13 +125,13 @@
         }
     }
 
-    public void DisplayHirableContractors(Contractor?[] pool)
+    public void DisplayHirableContractors(List<Contractor> pool)
     {
         Console.WriteLine("Hirable Contractors:");
 
         bool anyContractorsPrinted = false;
 
-        for (int i = 0; i < pool.Length; i++)
+        for (int i = 0; i < pool.Count; i++)
             if (pool[i] != null)
             {
                 Console.ForegroundColor = DetermineColorOfContractor(pool[i]!);
@@ -212,11 +212,11 @@
         Console.WriteLine(isSolved ? "Event was completed!" : "You failed");
     }
 
-    public void DisplayBattleVersus(Contractor?[] contractors, Enemy[] enemies)
+    public void DisplayBattleVersus(List<Contractor> contractors, Enemy[] enemies)
     {
-        for (int i = 0; i < (contractors.Length > enemies.Length ? contractors.Length : enemies.Length); i++)
+        for (int i = 0; i < (contractors.Count > enemies.Length ? contractors.Count : enemies.Length); i++)
         {
-            Combatant? contractor = i < contractors.Length ? contractors[i] : null;
+            Combatant? contractor = i < contractors.Count ? contractors[i] : null;
             Combatant? enemy = i < enemies.Length ? enemies[i] : null;
 
             if (contractor == null && enemy == null)
@@ -260,19 +260,26 @@
     public void DisplayBattleOutcome(bool playerWon)
     {
         if (playerWon)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("You've defeated all enemies!");
-        }
+            DisplayMessage("You've defeated all enemies!", ConsoleColor.Green);
         else
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("You've lost...");
-        }
-        Console.ResetColor();
+            DisplayMessage("You've lost...", ConsoleColor.Red);
     }
 
-    public void DisplayExpeditionResult(Expedition expedition, Player player)
+    public void DisplayUnpaidContractors(List<Contractor> contractors)
+    {
+        if (contractors.Count == 0)
+            return;
+
+        string contractorNames = "";
+        for (int i = 0; i < contractors.Count; i++)
+        {
+            contractorNames += contractors[i].Name + ", ";
+        }
+
+        DisplayMessage("You could not pay " + contractorNames + "and will no longer fight alongside you.", ConsoleColor.Red);
+    }
+
+    public void DisplayExpeditionResult(Expedition expedition, Player player, List<Contractor> unpaidContractors)
     {
         Console.Write("You've completed: ");
         DisplayExpedition(expedition);
@@ -288,6 +295,7 @@
         Console.WriteLine($"Completed events: {expedition.GetCompletedEventsCount()}/{expedition.Events.Length} | Gained GP: {expedition.RewardedGP}");
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"Alive contractors took {player.DailyContractorsGPRate} GP for the expedition");
+        DisplayUnpaidContractors(unpaidContractors);
         Console.WriteLine();
         Console.ResetColor();
     }

@@ -1,8 +1,8 @@
 ﻿internal class Player
 {
+    protected const int ContractorPartySize = 5;
     public string Name { get; }
-    public Contractor?[] Contractors { get; protected set; } = new Contractor[5];
-    public int ContractorCount { get; protected set; }
+    public List<Contractor> Contractors { get; protected set; } = new List<Contractor>();
     public int GP { get; protected set; }
     public int DailyContractorsGPRate { get; protected set; }
 
@@ -11,11 +11,12 @@
         Name = name;
         GP = startingGP;
     }
+
     public bool HireContractor(Contractor contractor)
     {
-        if (ContractorCount < Contractors.Length && contractor.DailyRate + DailyContractorsGPRate < GP) 
+        if (!ContractorPartyFull() && contractor.DailyRate + DailyContractorsGPRate < GP) 
         {
-            Contractors[ContractorCount++] = contractor;
+            Contractors.Add(contractor);
             DailyContractorsGPRate += contractor.DailyRate;
             return true;
         }
@@ -24,32 +25,15 @@
 
     public Contractor DismissContractor(int index) 
     {
-        DailyContractorsGPRate -= Contractors[index]!.DailyRate;
-        Contractor dismiss = Contractors[index]!;
-        Contractors[index] = null;
-        SortContractors();
-        ContractorCount--;
+        DailyContractorsGPRate -= Contractors[index].DailyRate;
+        Contractor dismiss = Contractors[index];
+        Contractors.RemoveAt(index);
         return dismiss;
-    }
-
-    protected void SortContractors()
-    {
-        for (int i = 0; i < ContractorCount - 1; i++)
-        {
-            for (int j = i + 1; j < ContractorCount; j++)
-            {
-                if (Contractors[i] == null)
-                {
-                    Contractors[i] = Contractors[j];
-                    Contractors[j] = null!;
-                }
-            }
-        }
     }
 
     public Contractor? GetRoleTypeContractor(RoleType roleType)
     {
-        foreach (Contractor? contractor in Contractors)
+        foreach (Contractor contractor in Contractors)
             if (contractor?.Roles.Contains(roleType) == true && contractor.Health > 0)
                 return contractor;
 
@@ -61,9 +45,8 @@
         string report = "Covered Roles:\n";
 
         // adds covered roles into report
-        foreach (Contractor? contractor in Contractors)
-            if (contractor != null)
-                report += $"{contractor.Name}: {contractor.RoleList()}\n";
+        foreach (Contractor contractor in Contractors)
+            report += $"{contractor.Name}: {contractor.RoleList()}\n";
 
         if (report == "Covered Roles:\n")
             report = "No contractor hired";
@@ -82,11 +65,11 @@
         RoleType[] allRoles = Enum.GetValues<RoleType>();
         bool[] found = new bool[allRoles.Length];
 
-        for (int i = 1; i < allRoles.Length; i++) // checks all except commoner(default enum)
+        for (int i = 0; i < allRoles.Length; i++)
         {
-            for (int j = 0; j < Contractors.Length; j++)
+            for (int j = 0; j < Contractors.Count; j++)
             {
-                if (Contractors[j] != null && Contractors[j]!.Roles.Contains(allRoles[i]))
+                if (Contractors[j] != null && Contractors[j].Roles.Contains(allRoles[i]))
                 {
                     found[i] = true;
                     break;
@@ -112,8 +95,8 @@
 
     public bool AllContractorsFullHP()
     {
-        foreach (Contractor? contractor in Contractors)
-            if (contractor?.Health < contractor?.MaxHealth)
+        foreach (Contractor contractor in Contractors)
+            if (contractor.Health < contractor?.MaxHealth)
                 return false;
 
         return true;
@@ -121,7 +104,7 @@
 
     public bool HaveHealers()
     {
-        foreach (Contractor? contractor in Contractors)
+        foreach (Contractor contractor in Contractors)
             if (contractor is IHealer)
                 return true;
 
@@ -130,7 +113,7 @@
 
     public bool AnyHealerCanPerformHealing()
     {
-        foreach (Contractor? contractor in Contractors)
+        foreach (Contractor contractor in Contractors)
             if (contractor is IHealer healer && healer.HealCooldown == 0)
                 return true;
 
@@ -139,40 +122,53 @@
 
     public bool ContractorsAreWiped()
     {
-        foreach (Contractor? contractor in Contractors)
-            if (contractor?.Health > 0)
+        foreach (Contractor contractor in Contractors)
+            if (contractor.Health > 0)
                 return false;
 
         return true;
     }
 
-    public void PayContractorsAfterExpedition()
+    public List<Contractor> PayContractorsAfterExpedition()
     {
-        for (int i = 0; i < Contractors.Length; i++)
-            if (Contractors[i]?.Health == 0)
-                DailyContractorsGPRate -= Contractors[i]!.DailyRate;
+        List<Contractor> unpaid = new List<Contractor>();
 
-        GP -= DailyContractorsGPRate;
+        for (int i = 0; i < Contractors.Count; i++)
+        {
+            if (Contractors[i].Health == 0)
+                DailyContractorsGPRate -= Contractors[i].DailyRate;
+            else if (GP < Contractors[i].DailyRate)
+            {
+                unpaid.Add(Contractors[i]);
+                DismissContractor(i);
+            }    
+            else
+                GP -= Contractors[i].DailyRate;
+        }
+
+        return unpaid;
     }
 
     public void ResetContractors()
     {
-        foreach (Contractor? contractor in Contractors)
-            if (contractor?.Health > 0)
+        foreach (Contractor contractor in Contractors)
+            if (contractor.Health > 0)
                 contractor.Reset();
     }
 
     public void RemoveAnyDeadContractor()
     {
-        for (int i = 0; i < Contractors.Length; i++)
-            if (Contractors[i]?.Health == 0)
-                Contractors[i] = null;
+        for (int i = 0; i < Contractors.Count; i++)
+            if (Contractors[i].Health == 0)
+                Contractors.RemoveAt(i);
     }
 
     public void UpdateAfterEvent()
     {
-        foreach (Contractor? contractor in Contractors)
+        foreach (Contractor contractor in Contractors)
             if (contractor is IHealer healer)
                 healer.DecrementCooldown();
     }
+
+    public bool ContractorPartyFull() => Contractors.Count == ContractorPartySize;
 }

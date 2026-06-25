@@ -29,19 +29,19 @@ internal static class ContractorStoreGenerator
 
     private static Random Random { get; } = new Random();
 
-    public static Contractor[] Generate(int size)
+    public static List<Contractor> Generate(int size)
     {
-        Contractor[] Contractors = new Contractor[size];
+        List<Contractor> Contractors = new List<Contractor>();
         
-        for (int i = 0; i < Contractors.Length; i++)
+        for (int i = 0; i < size; i++)
         {
             int type = Random.Next(0, 7);
-            Contractors[i] = type switch
+            Contractors.Add(type switch
             {
                 1 => GenerateMedic(),
                 2 => GenerateScout(),
                 _ => GenerateFighter()
-            };
+            });
         }
         
         return Contractors;

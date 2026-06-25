@@ -10,7 +10,7 @@
     {
         foreach (Enemy enemy in Enemies)
             if (enemy.Health > 0)
-                player.Contractors[Random.Next(0, player.ContractorCount)]!.ReceiveDamage(enemy.Attack());
+                player.Contractors[Random.Next(0, player.Contractors.Count)]!.ReceiveDamage(enemy.Attack());
     }
 
     public override bool EventCompleted()

@@ -60,22 +60,22 @@
         return target;
     }
 
-    public Contractor AskForTargetOfHealer(Contractor?[] contractors)
+    public Contractor AskForTargetOfHealer(List<Contractor> contractors)
     {
         Console.Write("Which contractor you wish to heal? ");
-        Contractor? target = (Contractor?)GetCombatant(contractors); // - 1 because combatants are displayed index + 1; TODO: implement TryParse
+        Contractor? target = (Contractor?)GetCombatant(contractors.ToArray()); // - 1 because combatants are displayed index + 1; TODO: implement TryParse
 
         while (target == null || target.Health == 0)
         {
             NoSuchOption();
-            target = (Contractor?)GetCombatant(contractors);
+            target = (Contractor?)GetCombatant(contractors.ToArray());
         }
 
         Console.Clear();
         return target;
     }
 
-    private Combatant? GetCombatant(Combatant?[] combatants)
+    private Combatant? GetCombatant(Combatant[] combatants)
     {
         int index = Convert.ToInt32(Console.ReadLine()) - 1; // - 1 because combatants are displayed index + 1; TODO: implement TryParse
         return index < combatants.Length && index >= 0 ? combatants[index] : null;

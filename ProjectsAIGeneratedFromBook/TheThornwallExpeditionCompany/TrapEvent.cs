@@ -6,10 +6,10 @@
         TrapDamage = trapDamage;
     }
 
-    public void DealTrapDamage(Contractor?[] contractors)
+    public void DealTrapDamage(List<Contractor> contractors)
     {
-        for (int i = 0; i < contractors.Length; i++)
-            if (contractors[i]?.Health > 0)
-                contractors[i]!.ReceiveDamage(TrapDamage);
+        for (int i = 0; i < contractors.Count; i++)
+            if (contractors[i].Health > 0)
+                contractors[i].ReceiveDamage(TrapDamage);
     }
 }

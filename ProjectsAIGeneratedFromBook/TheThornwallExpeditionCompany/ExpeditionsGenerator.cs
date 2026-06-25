@@ -14,17 +14,17 @@ internal static class ExpeditionsGenerator
         "the Blackroot Forest", "the Forgotten Catacombs", "the Emberlands", "the Veiled Marsh"
     };
 
-    public static Expedition[] Generate(int size)
+    public static List<Expedition> Generate(int size)
     {
-        Expedition[] expeditions = new Expedition[size];
+        List<Expedition> expeditions = new List<Expedition>();
 
-        for (int i = 0; i < expeditions.Length; i++)
+        for (int i = 0; i < size; i++)
         {
             Difficulty difficulty = (Difficulty)Random.Next(0, 3);
             string name = Names[Random.Next(Names.Length)];
             string destination = Destinations[Random.Next(Destinations.Length)];
             
-            expeditions[i] = new Expedition(name, destination, difficulty, GenerateEvents(difficulty));
+            expeditions.Add(new Expedition(name, destination, difficulty, GenerateEvents(difficulty)));
         }
 
         return expeditions;
